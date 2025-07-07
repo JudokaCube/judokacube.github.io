@@ -4,3 +4,4 @@
 
 // Placeholder for future interactive features
 console.log('JudokaCube site loaded');
+document.getElementById("year").textContent = new Date().getFullYear();
