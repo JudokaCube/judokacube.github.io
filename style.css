@@ -35,7 +35,7 @@ main {
   text-align: center;
 }
 
-/* Circular profile image */
+/* Circular profile image on home page */
 .profile-pic {
   width: 180px;
   height: 180px;
@@ -45,7 +45,17 @@ main {
   margin-top: 1.5rem;
 }
 
-/* General responsive grid */
+/* Circular service images (smaller) */
+.service-pic {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid white;
+  margin-top: 1rem;
+}
+
+/* General responsive grid (About, Services) */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -53,7 +63,7 @@ main {
   padding: 2rem;
 }
 
-/* Fixed 3x2 grid for portfolio */
+/* Fixed 3x2 layout (Portfolio) */
 .grid-three {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -61,14 +71,14 @@ main {
   padding: 2rem;
 }
 
-/* Responsive layout for mobile */
+/* Responsive fallback for smaller screens */
 @media (max-width: 768px) {
   .grid-three {
     grid-template-columns: 1fr;
   }
 }
 
-/* Card styling */
+/* Card container */
 .card {
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 1rem;
@@ -83,7 +93,7 @@ main {
   transform: scale(1.03);
 }
 
-/* Footer */
+/* Footer styling */
 footer {
   text-align: center;
   padding: 1rem;
