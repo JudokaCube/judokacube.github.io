@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JudokaCube – Services</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" href="../favicon.png" type="image/png" />
 </head>
 <body>
   <nav>
@@ -14,26 +14,29 @@
     <a href="portfolio.html">Portfolio</a>
     <a href="services.html" class="active">Services</a>
   </nav>
+
   <main>
     <h1>Services</h1>
     <div class="grid">
       <div class="card">
         <h2>Discord Bots</h2>
-        <img src="bots.png" alt="Discord Bots" class="service-pic" />
+        <img src="../images/bots.png" alt="Discord Bots" class="service-pic" />
       </div>
       <div class="card">
         <h2>Discord Servers</h2>
-        <img src="servers.png" alt="Discord Servers" class="service-pic" />
+        <img src="../images/servers.png" alt="Discord Servers" class="service-pic" />
       </div>
       <div class="card">
         <h2>Webpages</h2>
-        <img src="webpages.png" alt="Webpages" class="service-pic" />
+        <img src="../images/webpages.png" alt="Webpages" class="service-pic" />
       </div>
     </div>
   </main>
+
   <footer>
     <p>&copy; <span id="year"></span> JudokaCube. All rights reserved.</p>
   </footer>
+
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
