@@ -35,7 +35,17 @@ main {
   text-align: center;
 }
 
-/* Universal grid (auto-fit for About & Services) */
+/* Circular profile image */
+.profile-pic {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid white;
+  margin-top: 1.5rem;
+}
+
+/* General responsive grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -43,7 +53,7 @@ main {
   padding: 2rem;
 }
 
-/* 3×2 grid for portfolio */
+/* Fixed 3x2 grid for portfolio */
 .grid-three {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -51,7 +61,7 @@ main {
   padding: 2rem;
 }
 
-/* Responsive fallback for smaller screens */
+/* Responsive layout for mobile */
 @media (max-width: 768px) {
   .grid-three {
     grid-template-columns: 1fr;
