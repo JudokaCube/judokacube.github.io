@@ -61,7 +61,58 @@ document.querySelectorAll('.footer').forEach(el => {
   revealObserver.observe(el);
 });
 
-/* ── Copy username button ── */
+/* ── Music player ── */
+(function () {
+  const audio   = document.getElementById('bgMusic');
+  const widget  = document.getElementById('musicWidget');
+  const btn     = document.getElementById('musicBtn');
+  const panel   = document.getElementById('musicPanel');
+  const slider  = document.getElementById('volumeSlider');
+
+  let playing = false;
+  let open    = false;
+
+  // Set initial volume
+  audio.volume = slider.value / 100;
+  updateSliderFill();
+
+  // Toggle panel open/close on button click
+  btn.addEventListener('click', () => {
+    if (!open) {
+      open = true;
+      widget.classList.add('open');
+
+      // Start music on first interaction (browser autoplay policy)
+      if (!playing) {
+        audio.play().then(() => {
+          playing = true;
+          btn.classList.add('playing');
+        }).catch(() => {});
+      }
+    } else {
+      open = false;
+      widget.classList.remove('open');
+    }
+  });
+
+  // Close panel when clicking outside
+  document.addEventListener('click', e => {
+    if (!widget.contains(e.target) && open) {
+      open = false;
+      widget.classList.remove('open');
+    }
+  });
+
+  // Volume slider
+  slider.addEventListener('input', () => {
+    audio.volume = slider.value / 100;
+    updateSliderFill();
+  });
+
+  function updateSliderFill() {
+    slider.style.setProperty('--val', slider.value + '%');
+  }
+})();
 const copyBtn = document.getElementById('copyBtn');
 if (copyBtn) {
   let resetTimer = null;
