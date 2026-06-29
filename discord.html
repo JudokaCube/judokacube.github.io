@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="JDKCube's Discord profile." />
+  <title>Discord — JDKCube</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="container">
+      <a class="nav-logo" href="index.html">JDKCube</a>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="discord.html">Discord</a></li>
+        <li><a href="projects.html">Projects</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div class="container">
+
+      <header class="page-header">
+        <h1>Discord <span class="accent">Profile</span></h1>
+        <p>Live status via Lanyard API.</p>
+      </header>
+
+      <div class="discord-wrapper">
+        <div style="width:100%;max-width:380px;margin:0 auto;">
+          <div id="dc-error" class="discord-error-banner" role="alert"></div>
+
+          <!-- Discord-style profile card -->
+          <div class="discord-profile">
+
+            <!-- Banner -->
+            <div class="discord-banner"></div>
+
+            <!-- Avatar -->
+            <div class="discord-avatar-area">
+              <div class="discord-avatar-wrap">
+                <img
+                  id="dc-avatar"
+                  class="discord-avatar"
+                  src=""
+                  alt="Discord avatar"
+                  width="80"
+                  height="80"
+                  loading="lazy"
+                />
+                <div id="dc-status-dot" class="discord-status-dot offline"></div>
+              </div>
+            </div>
+
+            <!-- Profile body: only the requested fields -->
+            <div class="discord-body">
+
+              <!-- Display name -->
+              <div id="dc-display-name" class="discord-displayname">JDKCube</div>
+              <!-- Username handle -->
+              <div id="dc-username" class="discord-username">@judokacube</div>
+
+              <div class="discord-divider"></div>
+
+              <!-- Status -->
+              <div class="discord-status-row">
+                <div id="dc-status-label" class="discord-status-label offline">Offline</div>
+              </div>
+
+              <div class="discord-divider"></div>
+
+              <!-- User ID -->
+              <div class="discord-section-label">User ID</div>
+              <div id="dc-uid" class="discord-uid">820292272209002526</div>
+
+              <!-- Copy username button -->
+              <button class="discord-copy-btn" id="dc-copy-btn" aria-label="Copy username">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                <span id="dc-copy-text">Copy Username</span>
+              </button>
+
+            </div><!-- /discord-body -->
+          </div><!-- /discord-profile -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/nav.js"></script>
+  <script src="js/discord.js"></script>
+  <script>
+    // Copy username button
+    const copyBtn  = document.getElementById('dc-copy-btn');
+    const copyText = document.getElementById('dc-copy-text');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText('judokacube').then(() => {
+          copyBtn.classList.add('copied');
+          copyText.textContent = 'Copied!';
+          setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyText.textContent = 'Copy Username';
+          }, 2000);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
