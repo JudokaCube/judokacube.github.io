@@ -18,8 +18,8 @@
     <div class="hero-bg-grid"></div>
     <div class="hero-glow"></div>
     <div class="hero-content fade-in">
-      <span class="hero-eyebrow">hi, i'm</span>
-      <h1 class="hero-title">JDKCube.</h1>
+      <span class="hero-eyebrow">hey, i'm</span>
+      <h1 class="hero-title">JDKCube</h1>
       <p class="hero-desc">
         just a guy who likes httyd, hollow knight, other games, scuba and linux.<br class="br-hide" />
         this is my little corner of the internet :D
@@ -192,7 +192,7 @@
 
             <div class="dc-divider"></div>
 
-            <div class="dc-meta-label">MEMBER SINCE 2021</div>
+            <div class="dc-meta-label">MEMBER SINCE</div>
             <div class="dc-meta-row">
               <span class="dc-meta-value">Discord</span>
             </div>
@@ -224,6 +224,27 @@
       </span>
     </div>
   </footer>
+
+  <!-- ░░ MUSIC PLAYER ░░ -->
+  <audio id="bgMusic" src="assets/music.mp3" loop preload="auto"></audio>
+
+  <div class="music-widget" id="musicWidget" aria-label="Background music controls">
+    <button class="music-btn" id="musicBtn" aria-label="Toggle music / show volume">
+      <span class="music-icon">♪</span>
+    </button>
+    <div class="music-panel" id="musicPanel" role="tooltip">
+      <input
+        type="range"
+        class="music-slider"
+        id="volumeSlider"
+        min="0"
+        max="100"
+        value="40"
+        aria-label="Volume"
+      />
+      <p class="music-label">Romantic Flight<br /><span>From How to Train Your Dragon · John Powell</span></p>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
