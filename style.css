@@ -726,6 +726,138 @@ button { cursor: pointer; font-family: inherit; }
 }
 
 /* ============================================
+   MUSIC WIDGET
+   ============================================ */
+.music-widget {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+/* Toggle button */
+.music-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  transition: all var(--transition);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  position: relative;
+  z-index: 2;
+}
+.music-btn:hover,
+.music-widget.open .music-btn {
+  border-color: var(--border-cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 14px var(--cyan-glow);
+}
+.music-btn.playing .music-icon {
+  animation: spin-note 3s linear infinite;
+}
+@keyframes spin-note {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Panel */
+.music-panel {
+  margin-top: 0.5rem;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-cyan);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 0.85rem;
+  min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px var(--cyan-glow2);
+
+  opacity: 0;
+  transform: translateY(-6px) scale(0.97);
+  pointer-events: none;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+.music-widget.open .music-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+/* Slider track */
+.music-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  /* filled portion via JS on --val */
+  background: linear-gradient(
+    to right,
+    var(--cyan) 0%,
+    var(--cyan) var(--val, 40%),
+    rgba(255,255,255,0.1) var(--val, 40%),
+    rgba(255,255,255,0.1) 100%
+  );
+}
+.music-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.music-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 14px var(--cyan-glow);
+}
+.music-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+  cursor: pointer;
+}
+
+/* Track label */
+.music-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.music-label span {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 .br-hide { display: none; }
