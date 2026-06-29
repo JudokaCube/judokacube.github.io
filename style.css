@@ -700,6 +700,19 @@ button { cursor: pointer; font-family: inherit; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.footer-favicon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+  /* pull out of gradient clip so image renders normally */
+  -webkit-text-fill-color: initial;
+  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.4));
 }
 
 .footer-copy {
