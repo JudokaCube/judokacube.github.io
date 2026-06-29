@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JDKCube</title>
+  <meta name="description" content="JDKCube – personal site. Into games, dragons, and scuba diving." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ░░ HERO ░░ -->
+  <section id="home" class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content fade-in">
+      <span class="hero-eyebrow">hey, i'm</span>
+      <h1 class="hero-title">JDKCube</h1>
+      <p class="hero-desc">
+        just a guy who likes hollow knight, dragons, and going underwater.<br class="br-hide" />
+        this is my little corner of the internet.
+      </p>
+      <div class="hero-btns">
+        <a href="#about"    class="btn btn-ghost" data-scroll>about me</a>
+        <a href="#projects" class="btn btn-ghost" data-scroll>projects</a>
+        <a href="#discord"  class="btn btn-primary" data-scroll>discord</a>
+      </div>
+    </div>
+    <div class="scroll-hint" aria-hidden="true">
+      <span></span>
+    </div>
+  </section>
+
+  <!-- ░░ ABOUT ░░ -->
+  <section id="about" class="section about">
+    <div class="container">
+      <div class="section-label">// about</div>
+      <h2 class="section-title">a bit about me</h2>
+      <p class="about-intro">
+        not great at writing bios, honestly. but here's the honest version:
+        i'm into a handful of things pretty deeply, and not much else.
+      </p>
+      <div class="interests-grid">
+
+        <div class="interest-card" style="--delay:0ms">
+          <div class="interest-icon">🐉</div>
+          <div class="interest-body">
+            <h3>How to Train Your Dragon</h3>
+            <p>triple stryke is objectively the best dragon and i will not argue about this</p>
+          </div>
+        </div>
+
+        <div class="interest-card" style="--delay:80ms">
+          <div class="interest-icon">🐛</div>
+          <div class="interest-body">
+            <h3>Hollow Knight</h3>
+            <p>109% path of pain done. i have regrets but also no regrets</p>
+          </div>
+        </div>
+
+        <div class="interest-card" style="--delay:160ms">
+          <div class="interest-icon">🤿</div>
+          <div class="interest-body">
+            <h3>Scuba diving</h3>
+            <p>quietest hobby i have. you stop thinking about everything down there</p>
+          </div>
+        </div>
+
+        <div class="interest-card" style="--delay:240ms">
+          <div class="interest-icon">⛏️</div>
+          <div class="interest-body">
+            <h3>Minecraft</h3>
+            <p>been playing since forever. still don't have a nether portal that looks good</p>
+          </div>
+        </div>
+
+        <div class="interest-card" style="--delay:320ms">
+          <div class="interest-icon">🐧</div>
+          <div class="interest-body">
+            <h3>Linux</h3>
+            <p>daily driver. spent way too long configuring things that already worked fine</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ PROJECTS ░░ -->
+  <section id="projects" class="section projects">
+    <div class="container">
+      <div class="section-label">// projects</div>
+      <h2 class="section-title">stuff i've made</h2>
+      <div class="projects-grid">
+
+        <div class="project-card" style="--delay:0ms">
+          <div class="project-top">
+            <span class="project-tag">website</span>
+            <div class="project-dot"></div>
+          </div>
+          <h3>JDKCube site</h3>
+          <p>this very site. built it from scratch — minimal, single-page, and actually mine for once.</p>
+          <a href="#home" class="project-link" data-scroll>view site ↗</a>
+        </div>
+
+        <div class="project-card" style="--delay:80ms">
+          <div class="project-top">
+            <span class="project-tag">discord bot</span>
+            <div class="project-dot"></div>
+          </div>
+          <h3>Skye</h3>
+          <p>a discord utility bot. does the things most bots overcomplicate. keeps things clean.</p>
+          <a href="#" class="project-link">source ↗</a>
+        </div>
+
+        <div class="project-card" style="--delay:160ms">
+          <div class="project-top">
+            <span class="project-tag">web</span>
+            <div class="project-dot"></div>
+          </div>
+          <h3>losangtsugtor.com</h3>
+          <p>a website i built for someone else. worked on layout, structure, and making it actually load fast.</p>
+          <a href="https://losangtsugtor.com" target="_blank" rel="noopener" class="project-link">visit ↗</a>
+        </div>
+
+        <div class="project-card" style="--delay:240ms">
+          <div class="project-top">
+            <span class="project-tag">web</span>
+            <div class="project-dot"></div>
+          </div>
+          <h3>anakreativa.com</h3>
+          <p>another site i put together. creative work needs good presentation — tried to deliver that.</p>
+          <a href="https://anakreativa.com" target="_blank" rel="noopener" class="project-link">visit ↗</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ DISCORD ░░ -->
+  <section id="discord" class="section discord-section">
+    <div class="container">
+      <div class="section-label">// discord</div>
+      <h2 class="section-title">find me on discord</h2>
+
+      <div class="discord-wrapper">
+        <!-- profile card -->
+        <div class="dc-card">
+
+          <!-- banner -->
+          <div class="dc-banner">
+            <img class="dc-banner-img" src="assets/banner.jpg" alt="" aria-hidden="true" />
+          </div>
+
+          <!-- avatar row -->
+          <div class="dc-avatar-row">
+            <div class="dc-avatar-wrap">
+              <div class="dc-avatar">
+                <img src="assets/pfp.jpg" alt="JDKCube avatar" class="dc-avatar-img" />
+              </div>
+              <span class="dc-status-dot dnd" title="Do Not Disturb"></span>
+            </div>
+            <div class="dc-badges"></div><!-- no invented badges -->
+          </div>
+
+          <!-- body -->
+          <div class="dc-body">
+
+            <div class="dc-names">
+              <span class="dc-display-name">JDKCube</span>
+              <span class="dc-username">judokacube</span>
+            </div>
+
+            <div class="dc-pronouns">he/him/lazy</div>
+
+            <div class="dc-custom-status">
+              <span class="dc-status-emoji">🤍</span>
+              <span class="dc-status-text">httyd | hk 109% PoP</span>
+            </div>
+
+            <div class="dc-divider"></div>
+
+            <div class="dc-about-label">ABOUT ME</div>
+            <div class="dc-bio">
+              <p>Not much to say, i like games, hollow knight and i like httyd. I also scuba dive ➴ jdkcube.net</p>
+              <p>rory, king 🤍</p>
+              <p>triple stryke best dragon oat</p>
+            </div>
+
+            <div class="dc-divider"></div>
+
+            <div class="dc-meta-label">MEMBER SINCE</div>
+            <div class="dc-meta-row">
+              <span class="dc-meta-value">Discord</span>
+            </div>
+
+            <div class="dc-user-id-row">
+              <span class="dc-meta-label-inline">USER ID</span>
+              <span class="dc-user-id">820292272209002526</span>
+            </div>
+
+            <button class="dc-copy-btn" id="copyBtn" aria-label="Copy username to clipboard">
+              <span class="dc-copy-label">Copy Username</span>
+              <span class="dc-copy-tick" aria-hidden="true">✓ Copied!</span>
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="footer-logo">JDKCube</span>
+      <span class="footer-copy">made with too many tabs open</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
