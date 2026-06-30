@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=5" />
   <script>
     (function () {
       var saved = localStorage.getItem('jdkcube-theme');
@@ -36,16 +36,44 @@
     <!-- tile grid -->
     <div class="tile-grid">
 
-      <!-- ABOUT LAUNCH TILE -->
-      <button class="tile tile-launch tile-about-launch" id="openAbout" aria-haspopup="dialog">
-        <div class="tile-spotlight" aria-hidden="true"></div>
-        <div class="tile-launch-icon">🐉</div>
-        <div class="tile-launch-text">
-          <h3>About Me</h3>
-          <p>httyd, hollow knight and more.</p>
-        </div>
-        <span class="tile-launch-arrow">↗</span>
-      </button>
+      <div class="tile-col-about">
+        <!-- ABOUT LAUNCH TILE -->
+        <button class="tile tile-launch tile-about-launch" id="openAbout" aria-haspopup="dialog">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-launch-icon">🐉</div>
+          <div class="tile-launch-text">
+            <h3>About Me</h3>
+            <p>httyd, hollow knight and more.</p>
+          </div>
+          <span class="tile-launch-arrow">↗</span>
+        </button>
+
+        <!-- DISCORD ACTIVITY TILE (live via Lanyard) -->
+        <section class="tile tile-discord-activity" id="discordActivityTile" aria-label="Live Discord activity">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-head">
+            <span class="tile-label">// now on discord</span>
+          </div>
+
+          <div class="da-status-row">
+            <span class="da-status-dot" id="daStatusDot"></span>
+            <span class="da-status-text" id="daStatusText">connecting…</span>
+          </div>
+
+          <div class="da-activity" id="daActivity" hidden>
+            <div class="da-activity-img-wrap">
+              <img class="da-activity-img" id="daActivityImg" src="" alt="" />
+            </div>
+            <div class="da-activity-text">
+              <p class="da-activity-name" id="daActivityName"></p>
+              <p class="da-activity-detail" id="daActivityDetail"></p>
+              <p class="da-activity-state" id="daActivityState"></p>
+            </div>
+          </div>
+
+          <p class="da-empty-msg" id="daEmptyMsg" hidden>not doing anything in particular right now</p>
+        </section>
+      </div>
 
       <!-- PROJECTS TILE -->
       <section class="tile tile-projects">
@@ -57,7 +85,7 @@
 
           <div class="project-card">
             <div class="project-top">
-              <span class="project-tag">web</span>
+              <span class="project-tag">website</span>
               <div class="project-dot"></div>
             </div>
             <h3>JDKCube site</h3>
@@ -339,6 +367,6 @@
   </a>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
