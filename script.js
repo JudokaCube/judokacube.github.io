@@ -61,6 +61,24 @@ document.querySelectorAll('.footer').forEach(el => {
   revealObserver.observe(el);
 });
 
+/* ── Theme toggle (dark / light) ── */
+(function () {
+  const root   = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
+
+  toggle.addEventListener('click', () => {
+    const isLight = root.getAttribute('data-theme') === 'light';
+    if (isLight) {
+      root.removeAttribute('data-theme');
+      localStorage.setItem('jdkcube-theme', 'dark');
+    } else {
+      root.setAttribute('data-theme', 'light');
+      localStorage.setItem('jdkcube-theme', 'light');
+    }
+  });
+})();
+
 /* ── Music player ── */
 (function () {
   const audio   = document.getElementById('bgMusic');
