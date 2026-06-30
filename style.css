@@ -457,6 +457,164 @@ button { cursor: pointer; font-family: inherit; }
 }
 
 /* ============================================
+   TERMINAL
+   ============================================ */
+.terminal-section {
+  background: linear-gradient(180deg, transparent 0%, rgba(0,229,255,0.02) 50%, transparent 100%);
+}
+
+.term-wrapper {
+  margin-top: 1rem;
+}
+
+.term-window {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-cyan);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 0 24px var(--cyan-glow2);
+}
+
+/* Titlebar */
+.term-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.term-dots {
+  display: flex;
+  gap: 6px;
+}
+.term-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  opacity: 0.85;
+}
+.term-dot.red    { background: #ff5f57; }
+.term-dot.yellow { background: #febc2e; }
+.term-dot.green  { background: #28c840; }
+
+.term-title {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  flex: 1;
+  text-align: center;
+}
+
+.term-status {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}
+.term-status.ready {
+  color: var(--cyan);
+}
+.term-status.ready::before {
+  content: '●';
+  margin-right: 4px;
+  font-size: 0.6rem;
+  filter: drop-shadow(0 0 4px var(--cyan));
+}
+
+/* Body */
+.term-body {
+  padding: 1.1rem 1.2rem;
+  max-height: 420px;
+  overflow-y: auto;
+  cursor: text;
+}
+.term-body::-webkit-scrollbar { width: 8px; }
+.term-body::-webkit-scrollbar-track { background: transparent; }
+.term-body::-webkit-scrollbar-thumb {
+  background: var(--border-cyan);
+  border-radius: 999px;
+}
+
+.term-output {
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+.term-line-in {
+  color: var(--cyan);
+}
+.term-line-in::before {
+  content: '>>> ';
+  opacity: 0.6;
+}
+.term-line-err {
+  color: #ff6b6b;
+}
+.term-line-out {
+  color: var(--text-muted);
+}
+.term-line-sys {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.term-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.term-prompt {
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--cyan);
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.term-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--text);
+  caret-color: var(--cyan);
+}
+.term-input::placeholder {
+  color: var(--text-dim);
+}
+.term-input:disabled {
+  opacity: 0.4;
+}
+
+.term-hint {
+  margin-top: 0.7rem;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+.term-hint code {
+  font-family: var(--font-mono);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 0.05rem 0.4rem;
+  border-radius: 5px;
+  color: var(--cyan);
+}
+
+/* ============================================
    DISCORD SECTION
    ============================================ */
 .discord-section {
