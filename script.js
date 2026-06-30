@@ -57,6 +57,7 @@ try {
   });
   setupModal('openDiscord', 'discordModal', 'closeDiscord');
   setupModal('openAbout', 'aboutModal', 'closeAbout');
+  setupModal('openSpecs', 'specsModal', 'closeSpecs');
   setupModal('openBook', 'bookModal', 'closeBook');
   setupModal('openMcSkin', 'mcSkinModal', 'closeMcSkin', () => {
     if (typeof initMcSkinViewer === 'function') initMcSkinViewer();
@@ -702,5 +703,166 @@ try {
   });
 })();
 } catch (e) { console.error('minecraft skin viewer setup failed:', e); }
+
+/* ── Click counter tile ── */
+try {
+(function () {
+  const btn = document.getElementById('clickCounter');
+  const valueEl = document.getElementById('counterValue');
+  if (!btn || !valueEl) return;
+
+  const STORAGE_KEY = 'jdkcube-clickcount';
+  let count = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+  if (!Number.isFinite(count) || count < 0) count = 0;
+  valueEl.textContent = count.toLocaleString();
+
+  btn.addEventListener('click', () => {
+    count += 1;
+    valueEl.textContent = count.toLocaleString();
+    localStorage.setItem(STORAGE_KEY, String(count));
+
+    valueEl.classList.remove('bump');
+    // force reflow so the animation can restart on rapid clicks
+    void valueEl.offsetWidth;
+    valueEl.classList.add('bump');
+  });
+})();
+} catch (e) { console.error('click counter setup failed:', e); }
+
+/* ── Mini paint tile ── */
+try {
+(function () {
+  const canvas = document.getElementById('paintCanvas');
+  const wrap = document.getElementById('paintCanvasWrap');
+  if (!canvas || !wrap) return;
+
+  const ctx = canvas.getContext('2d');
+  const clearBtn = document.getElementById('paintClear');
+  const sizeSlider = document.getElementById('paintSize');
+  const strengthSlider = document.getElementById('paintStrength');
+  const colorPicker = document.getElementById('paintColorPicker');
+  const swatches = document.querySelectorAll('.paint-swatch');
+
+  let currentColor = '#00e5ff';
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  function resizeCanvas() {
+    const ratio = window.devicePixelRatio || 1;
+    const w = wrap.clientWidth;
+    const h = wrap.clientHeight;
+    if (w === 0 || h === 0) return;
+    canvas.width = w * ratio;
+    canvas.height = h * ratio;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  // wait a tick so layout/fonts have settled before measuring the wrapper
+  requestAnimationFrame(resizeCanvas);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resizeCanvas, 150);
+  });
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const point = e.touches && e.touches.length ? e.touches[0] : e;
+    return {
+      x: point.clientX - rect.left,
+      y: point.clientY - rect.top
+    };
+  }
+
+  function drawLine(x1, y1, x2, y2) {
+    const size = parseFloat(sizeSlider.value) || 6;
+    const strength = (parseFloat(strengthSlider.value) || 100) / 100;
+    ctx.strokeStyle = currentColor;
+    ctx.globalAlpha = strength;
+    ctx.lineWidth = size;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  function startDraw(e) {
+    drawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    drawLine(pos.x, pos.y, pos.x, pos.y); // dot for a single click/tap
+    e.preventDefault();
+  }
+
+  function moveDraw(e) {
+    if (!drawing) return;
+    const pos = getPos(e);
+    drawLine(lastX, lastY, pos.x, pos.y);
+    lastX = pos.x;
+    lastY = pos.y;
+    e.preventDefault();
+  }
+
+  function endDraw() {
+    drawing = false;
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  window.addEventListener('mouseup', endDraw);
+
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', moveDraw, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+  canvas.addEventListener('touchcancel', endDraw);
+
+  function setActiveSwatch(btn) {
+    swatches.forEach(s => s.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  swatches.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentColor = btn.dataset.color;
+      if (colorPicker) colorPicker.value = currentColor;
+      setActiveSwatch(btn);
+    });
+  });
+
+  if (colorPicker) {
+    colorPicker.addEventListener('input', () => {
+      currentColor = colorPicker.value;
+      setActiveSwatch(null);
+    });
+  }
+
+  function bindSliderFill(slider) {
+    if (!slider) return;
+    const update = () => {
+      const min = parseFloat(slider.min) || 0;
+      const max = parseFloat(slider.max) || 100;
+      const pct = ((slider.value - min) / (max - min)) * 100;
+      slider.style.setProperty('--val', pct + '%');
+    };
+    update();
+    slider.addEventListener('input', update);
+  }
+  bindSliderFill(sizeSlider);
+  bindSliderFill(strengthSlider);
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  }
+})();
+} catch (e) { console.error('paint tile setup failed:', e); }
 
 }); // end DOMContentLoaded
