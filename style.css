@@ -1247,12 +1247,14 @@ html, body.dashboard-body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0.9rem 0.9rem 0 0;
-  transform: translateY(14px) scale(0.97);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  transition: opacity 0.3s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   display: flex;
   flex-direction: column;
 }
 .modal-overlay.open .modal-box {
+  opacity: 1;
   transform: translateY(0) scale(1);
 }
 
@@ -1300,6 +1302,10 @@ body.modal-open .theme-toggle {
 }
 .term-modal-box .term-window {
   border-radius: var(--radius-lg);
+  transition: box-shadow 0.4s ease;
+}
+.modal-overlay.open .term-modal-box .term-window {
+  box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 0 0 1px var(--border-cyan), 0 0 30px var(--cyan-glow2);
 }
 .term-modal-box .term-body {
   max-height: min(55svh, 460px);
@@ -1308,9 +1314,69 @@ body.modal-open .theme-toggle {
   margin-top: 0.7rem;
 }
 
+/* terminal dots ease in one after another, once */
+.modal-overlay.open .term-dot {
+  opacity: 0;
+  animation: dotFadeIn 0.3s ease forwards;
+}
+.modal-overlay.open .term-dot:nth-child(1) { animation-delay: 0.05s; }
+.modal-overlay.open .term-dot:nth-child(2) { animation-delay: 0.10s; }
+.modal-overlay.open .term-dot:nth-child(3) { animation-delay: 0.15s; }
+@keyframes dotFadeIn {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 .dc-modal-box {
   width: min(380px, 92vw);
 }
+.dc-modal-box .dc-card {
+  transition: box-shadow 0.4s ease;
+}
+.modal-overlay.open .dc-modal-box .dc-card {
+  box-shadow: 0 16px 56px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08), 0 0 26px var(--cyan-glow2);
+}
+
+/* avatar settles in with a touch of delay after the card appears */
+.modal-overlay.open .dc-avatar-wrap {
+  opacity: 0;
+  transform: scale(0.85);
+  animation: avatarSettle 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.08s;
+}
+@keyframes avatarSettle {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* quiet, one-time fade/rise for content — no looping animation */
+.modal-overlay.open .dc-body > * {
+  opacity: 0;
+  animation: contentRise 0.35s ease forwards;
+}
+.modal-overlay.open .dc-body > *:nth-child(1) { animation-delay: 0.04s; }
+.modal-overlay.open .dc-body > *:nth-child(2) { animation-delay: 0.07s; }
+.modal-overlay.open .dc-body > *:nth-child(3) { animation-delay: 0.10s; }
+.modal-overlay.open .dc-body > *:nth-child(4) { animation-delay: 0.13s; }
+.modal-overlay.open .dc-body > *:nth-child(5) { animation-delay: 0.16s; }
+.modal-overlay.open .dc-body > *:nth-child(6) { animation-delay: 0.19s; }
+.modal-overlay.open .dc-body > *:nth-child(7) { animation-delay: 0.22s; }
+.modal-overlay.open .dc-body > *:nth-child(8) { animation-delay: 0.25s; }
+.modal-overlay.open .dc-body > *:nth-child(9) { animation-delay: 0.28s; }
+
+@keyframes contentRise {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-overlay.open .interest-row {
+  opacity: 0;
+  animation: contentRise 0.35s ease forwards;
+}
+.modal-overlay.open .interest-row:nth-child(1) { animation-delay: 0.05s; }
+.modal-overlay.open .interest-row:nth-child(2) { animation-delay: 0.08s; }
+.modal-overlay.open .interest-row:nth-child(3) { animation-delay: 0.11s; }
+.modal-overlay.open .interest-row:nth-child(4) { animation-delay: 0.14s; }
+.modal-overlay.open .interest-row:nth-child(5) { animation-delay: 0.17s; }
 
 /* ============================================
    RESPONSIVE
