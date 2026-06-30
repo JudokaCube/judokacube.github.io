@@ -10,6 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      var saved = localStorage.getItem('jdkcube-theme');
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
 </head>
 <body>
 
@@ -245,6 +251,12 @@
       <p class="music-label">Romantic Flight<br /><span>From How to Train Your Dragon · John Powell</span></p>
     </div>
   </div>
+
+  <!-- ░░ THEME TOGGLE ░░ -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light / dark mode">
+    <span class="theme-icon theme-icon-moon">🌙</span>
+    <span class="theme-icon theme-icon-sun">☀️</span>
+  </button>
 
   <script src="script.js"></script>
 </body>
