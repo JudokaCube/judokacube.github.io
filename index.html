@@ -177,8 +177,8 @@
     <!-- decoration tiles -->
     <div class="decor-grid">
 
-      <!-- riced arch linux fastfetch, purely decorative -->
-      <div class="tile tile-decor tile-decor-fastfetch" aria-hidden="true">
+      <!-- riced arch linux fastfetch — click for full pc specs -->
+      <button class="tile tile-decor tile-decor-fastfetch" id="openSpecs" aria-haspopup="dialog" aria-label="View PC specs">
         <div class="ff-window">
           <div class="ff-titlebar">
             <div class="term-dots">
@@ -189,22 +189,22 @@
             <span class="ff-titletext">jdkcube@arch: ~</span>
           </div>
           <div class="ff-body">
-            <pre class="ff-ascii">                 .o+`
-                `ooo/
-               `+oooo:
-              `+oooooo:
-              -+oooooo+:
-            `/:-:++oooo+:
-           `/++++/+++++++:
-          `/++++++++++++++:
-         `/+++ooooooooooooo/`
-        ./ooosssso++osssssso+`
-       .oossssso-````/ossssss+`
-      -osssssso.      :ssssssso.
-     :osssssss/        osssso+++.
-    /ossssssss/        +ssssooo/-
-  `/ossssso+/:-        -:/+osssso+-
- `+sso+:-`                 `.-/+oso:</pre>
+            <pre class="ff-ascii"><span class="ff-l1">                 .o+`</span>
+<span class="ff-l2">                `ooo/</span>
+<span class="ff-l3">               `+oooo:</span>
+<span class="ff-l4">              `+oooooo:</span>
+<span class="ff-l5">              -+oooooo+:</span>
+<span class="ff-l6">            `/:-:++oooo+:</span>
+<span class="ff-l7">           `/++++/+++++++:</span>
+<span class="ff-l8">          `/++++++++++++++:</span>
+<span class="ff-l9">         `/+++ooooooooooooo/`</span>
+<span class="ff-l10">        ./ooosssso++osssssso+`</span>
+<span class="ff-l11">       .oossssso-````/ossssss+`</span>
+<span class="ff-l12">      -osssssso.      :ssssssso.</span>
+<span class="ff-l13">     :osssssss/        osssso+++.</span>
+<span class="ff-l14">    /ossssssss/        +ssssooo/-</span>
+<span class="ff-l15">  `/ossssso+/:-        -:/+osssso+-</span>
+<span class="ff-l16"> `+sso+:-`                 `.-/+oso:</span></pre>
             <div class="ff-info">
               <p class="ff-userhost"><span class="ff-user">jdkcube</span><span class="ff-at">@</span><span class="ff-host">arch</span></p>
               <p class="ff-rule">-----------------</p>
@@ -221,7 +221,51 @@
             </div>
           </div>
         </div>
+        <span class="tile-launch-arrow ff-arrow">↗</span>
+      </button>
+
+      <!-- MINI PAINT TILE — stylized canvas with color / brush size / strength controls -->
+      <div class="tile tile-decor tile-decor-paint" aria-label="Mini paint canvas">
+        <div class="paint-head">
+          <span class="tile-label">// paint</span>
+          <button class="paint-clear-btn" id="paintClear" type="button">clear</button>
+        </div>
+
+        <div class="paint-canvas-wrap" id="paintCanvasWrap">
+          <canvas id="paintCanvas" class="paint-canvas"></canvas>
+        </div>
+
+        <div class="paint-controls">
+          <div class="paint-control-group paint-colors">
+            <span class="paint-control-label">color</span>
+            <div class="paint-swatch-row">
+              <button class="paint-swatch active" style="--swatch-color:#00e5ff" data-color="#00e5ff" aria-label="cyan"></button>
+              <button class="paint-swatch" style="--swatch-color:#ffffff" data-color="#ffffff" aria-label="white"></button>
+              <button class="paint-swatch" style="--swatch-color:#ff5d8f" data-color="#ff5d8f" aria-label="pink"></button>
+              <button class="paint-swatch" style="--swatch-color:#ffd166" data-color="#ffd166" aria-label="yellow"></button>
+              <button class="paint-swatch" style="--swatch-color:#6effa3" data-color="#6effa3" aria-label="green"></button>
+              <input type="color" id="paintColorPicker" class="paint-color-picker" value="#00e5ff" aria-label="custom color" />
+            </div>
+          </div>
+
+          <div class="paint-control-group">
+            <span class="paint-control-label">size</span>
+            <input type="range" id="paintSize" class="paint-slider" min="1" max="40" value="6" aria-label="brush size" />
+          </div>
+
+          <div class="paint-control-group">
+            <span class="paint-control-label">strength</span>
+            <input type="range" id="paintStrength" class="paint-slider" min="10" max="100" value="100" aria-label="brush strength" />
+          </div>
+        </div>
       </div>
+
+      <!-- CLICK COUNTER TILE — pure fun, increments per click, persists locally -->
+      <button class="tile tile-decor tile-decor-counter" id="clickCounter" aria-label="Click counter, click to add one">
+        <span class="counter-label">// clicks</span>
+        <span class="counter-value" id="counterValue">0</span>
+        <span class="counter-hint">click me</span>
+      </button>
 
       <!-- pure-CSS rotating wireframe cube, cyan lines, no fill -->
       <div class="tile tile-decor tile-decor-cube" aria-hidden="true">
@@ -407,6 +451,69 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ SPECS MODAL ░░ -->
+  <div class="modal-overlay" id="specsModal" role="dialog" aria-modal="true" aria-label="PC specs">
+    <div class="modal-box specs-modal-box">
+      <button class="modal-close" id="closeSpecs" aria-label="Close pc specs">✕</button>
+
+      <div class="specs-card">
+        <div class="specs-card-label">// specs</div>
+        <h2 class="specs-card-title">my specs</h2>
+
+        <div class="ff-window specs-window">
+          <div class="ff-titlebar">
+            <div class="term-dots">
+              <span class="term-dot red"></span>
+              <span class="term-dot yellow"></span>
+              <span class="term-dot green"></span>
+            </div>
+            <span class="ff-titletext">jdkcube@arch: ~</span>
+          </div>
+          <div class="ff-body specs-body">
+            <pre class="ff-ascii">                 .o+`
+                `ooo/
+               `+oooo:
+              `+oooooo:
+              -+oooooo+:
+            `/:-:++oooo+:
+           `/++++/+++++++:
+          `/++++++++++++++:
+         `/+++ooooooooooooo/`
+        ./ooosssso++osssssso+`
+       .oossssso-````/ossssss+`
+      -osssssso.      :ssssssso.
+     :osssssss/        osssso+++.
+    /ossssssss/        +ssssooo/-
+  `/ossssso+/:-        -:/+osssso+-
+ `+sso+:-`                 `.-/+oso:
+`++:.                           `-/+/
+ .`                                 `/</pre>
+            <div class="ff-info">
+              <p class="ff-userhost"><span class="ff-user">jdkcube</span><span class="ff-at">@</span><span class="ff-host">arch</span></p>
+              <p class="ff-rule">-----------------</p>
+              <p class="ff-row"><span class="ff-key">OS</span><span class="ff-val">Arch Linux x86_64</span></p>
+              <p class="ff-row"><span class="ff-key">Kernel</span><span class="ff-val">Linux 6.9.3-arch1-1</span></p>
+              <p class="ff-row"><span class="ff-key">Shell</span><span class="ff-val">zsh 5.9</span></p>
+              <p class="ff-row"><span class="ff-key">WM</span><span class="ff-val">Hyprland</span></p>
+              <p class="ff-rule">-----------------</p>
+              <p class="ff-row"><span class="ff-key">CPU</span><span class="ff-val">AMD Ryzen 5 7600</span></p>
+              <p class="ff-row"><span class="ff-key">GPU</span><span class="ff-val">AMD Radeon RX 7800 XT</span></p>
+              <p class="ff-row"><span class="ff-key">Memory</span><span class="ff-val">32GB DDR5</span></p>
+              <p class="ff-row"><span class="ff-key">Disk</span><span class="ff-val">2x 2TB SSD</span></p>
+              <p class="ff-row"><span class="ff-key">Disk</span><span class="ff-val">2x 2TB HDD</span></p>
+              <p class="ff-row"><span class="ff-key">Keyboard</span><span class="ff-val">NewSkill Pyros V2</span></p>
+              <p class="ff-row"><span class="ff-key">Mouse</span><span class="ff-val">ATK X1<span class="ff-cursor">▌</span></span></p>
+              <div class="ff-swatches">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
