@@ -4,64 +4,60 @@
 
 'use strict';
 
-/* ── Smooth scroll for [data-scroll] anchors ── */
-document.querySelectorAll('[data-scroll]').forEach(el => {
-  el.addEventListener('click', e => {
-    const href = el.getAttribute('href');
-    if (!href || !href.startsWith('#')) return;
-    const target = document.querySelector(href);
-    if (!target) return;
-    e.preventDefault();
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+/* ── Modal system (Terminal + Discord) ── */
+function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
+  const openBtn  = document.getElementById(openBtnId);
+  const modal    = document.getElementById(modalId);
+  const closeBtn = document.getElementById(closeBtnId);
+  if (!openBtn || !modal || !closeBtn) return;
+
+  let openedOnce = false;
+
+  function open() {
+    modal.classList.add('open');
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+
+    // close music volume panel if it's open, so nothing visually overlaps
+    const musicWidget = document.getElementById('musicWidget');
+    if (musicWidget) musicWidget.classList.remove('open');
+
+    if (!openedOnce && typeof onFirstOpen === 'function') {
+      openedOnce = true;
+      onFirstOpen();
+    }
+  }
+
+  function close() {
+    modal.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+  }
+
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
   });
-});
 
-/* ── Intersection Observer — staggered reveals ── */
-const observerOpts = {
-  threshold: 0.12,
-  rootMargin: '0px 0px -40px 0px',
-};
-
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    const el = entry.target;
-    const delay = el.style.getPropertyValue('--delay') || '0ms';
-    // respect CSS delay for stagger
-    el.style.transitionDelay = delay;
-    el.classList.add('visible');
-    revealObserver.unobserve(el);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) close();
   });
-}, observerOpts);
+}
 
-/* Observe section titles and labels */
-document.querySelectorAll(
-  '.section-title, .section-label, .about-intro'
-).forEach(el => {
-  el.classList.add('reveal');
-  revealObserver.observe(el);
+setupModal('openTerminal', 'terminalModal', 'closeTerminal', () => {
+  if (typeof initPyodideTerminal === 'function') initPyodideTerminal();
 });
 
-/* Staggered cards */
-document.querySelectorAll(
-  '.interest-card, .project-card'
-).forEach(el => {
-  revealObserver.observe(el);
-});
+setupModal('openDiscord', 'discordModal', 'closeDiscord');
+setupModal('openAbout', 'aboutModal', 'closeAbout');
 
-/* Discord card */
-document.querySelectorAll('.dc-card, .term-window').forEach(el => {
-  el.classList.add('reveal');
-  revealObserver.observe(el);
-});
 
-/* Footer */
-document.querySelectorAll('.footer').forEach(el => {
-  el.classList.add('reveal');
-  revealObserver.observe(el);
-});
 
 /* ── Python terminal (Pyodide REPL) ── */
+let initPyodideTerminal = function () {};
+
 (function () {
   const statusEl = document.getElementById('termStatus');
   const outputEl = document.getElementById('termOutput');
@@ -116,6 +112,27 @@ document.querySelectorAll('.footer').forEach(el => {
       inputEl.disabled = false;
       inputEl.placeholder = 'type python here…';
       inputEl.focus();
+
+      // help() tries to open an interactive pager that reads stdin, which
+      // doesn't exist in this environment and throws an I/O error. Patch it
+      // to just print the help text instead, like a non-interactive call.
+      try {
+        await pyodide.runPythonAsync(`
+import pydoc, builtins
+
+def _browser_help(*args):
+    if not args:
+        print("Type help(object) for help on a specific module, function, class, etc.")
+        return
+    text = pydoc.render_doc(args[0], renderer=pydoc.plaintext)
+    print(text)
+
+builtins.help = _browser_help
+        `);
+      } catch (patchErr) {
+        // non-fatal — if this fails, help() will still mostly work for simple cases
+      }
+
       printWelcome();
     } catch (err) {
       statusEl.textContent = 'failed to load';
@@ -178,18 +195,51 @@ document.querySelectorAll('.footer').forEach(el => {
     if (!inputEl.disabled) inputEl.focus();
   });
 
-  // Only load Pyodide once the terminal section actually scrolls into view
-  const termSection = document.getElementById('terminal');
-  const termObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && !pyodide) {
-        initPyodide();
-        termObserver.disconnect();
-      }
-    });
-  }, { threshold: 0, rootMargin: '200px 0px' });
+  // Only load Pyodide the first time the terminal modal is opened
+  initPyodideTerminal = function () {
+    if (!pyodide) initPyodide();
+  };
+})();
 
-  if (termSection) termObserver.observe(termSection);
+/* ── Per-tile spotlight + subtle 3D tilt ── */
+(function () {
+  const tiles = document.querySelectorAll('.tile');
+  const MAX_TILT = 4; // degrees, kept subtle
+
+  tiles.forEach((tile) => {
+    let rect = null;
+    let pending = null;
+
+    tile.addEventListener('mouseenter', () => {
+      rect = tile.getBoundingClientRect();
+      tile.classList.remove('tile-resetting');
+    });
+
+    tile.addEventListener('mousemove', (e) => {
+      if (!rect) rect = tile.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (pending) return;
+      pending = requestAnimationFrame(() => {
+        pending = null;
+        tile.style.setProperty('--mx', x + 'px');
+        tile.style.setProperty('--my', y + 'px');
+
+        const px = (x / rect.width) - 0.5;
+        const py = (y / rect.height) - 0.5;
+        const rotateY = (px * MAX_TILT * 2).toFixed(2);
+        const rotateX = (py * -MAX_TILT * 2).toFixed(2);
+        tile.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px)`;
+      });
+    });
+
+    tile.addEventListener('mouseleave', () => {
+      rect = null;
+      tile.classList.add('tile-resetting');
+      tile.style.transform = '';
+    });
+  });
 })();
 
 /* ── Theme toggle (dark / light) ── */
@@ -217,6 +267,7 @@ document.querySelectorAll('.footer').forEach(el => {
   const btn     = document.getElementById('musicBtn');
   const panel   = document.getElementById('musicPanel');
   const slider  = document.getElementById('volumeSlider');
+  const pauseBtn = document.getElementById('musicPauseBtn');
 
   let playing = false;
   let open    = false;
@@ -236,6 +287,7 @@ document.querySelectorAll('.footer').forEach(el => {
         audio.play().then(() => {
           playing = true;
           btn.classList.add('playing');
+          if (pauseBtn) pauseBtn.classList.remove('paused');
         }).catch(() => {});
       }
     } else {
@@ -251,6 +303,27 @@ document.querySelectorAll('.footer').forEach(el => {
       widget.classList.remove('open');
     }
   });
+
+  // Play / pause button inside the panel
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (playing) {
+        audio.pause();
+        playing = false;
+        btn.classList.remove('playing');
+        pauseBtn.classList.add('paused');
+        pauseBtn.setAttribute('aria-label', 'Play music');
+      } else {
+        audio.play().then(() => {
+          playing = true;
+          btn.classList.add('playing');
+          pauseBtn.classList.remove('paused');
+          pauseBtn.setAttribute('aria-label', 'Pause music');
+        }).catch(() => {});
+      }
+    });
+  }
 
   // Volume slider
   slider.addEventListener('input', () => {
