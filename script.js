@@ -88,8 +88,24 @@ document.querySelectorAll('.footer').forEach(el => {
   }
 
   async function initPyodide() {
+    statusEl.textContent = 'loading…';
+
+    if (typeof loadPyodide !== 'function') {
+      statusEl.textContent = 'failed to load';
+      statusEl.style.color = '#ff6b6b';
+      appendLine('Pyodide script did not load (likely blocked by network/adblock/CSP). Try disabling any ad blocker or content blocker for this site and refresh.', 'term-line-err');
+      return;
+    }
+
     try {
-      pyodide = await loadPyodide();
+      const loadPromise = loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'
+      });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timed out after 25s — slow or blocked connection')), 25000)
+      );
+
+      pyodide = await Promise.race([loadPromise, timeoutPromise]);
 
       // redirect stdout/stderr into our terminal
       pyodide.setStdout({ batched: (s) => appendLine(s, 'term-line-out') });
@@ -103,7 +119,9 @@ document.querySelectorAll('.footer').forEach(el => {
       printWelcome();
     } catch (err) {
       statusEl.textContent = 'failed to load';
-      appendLine('Could not load the Python runtime. Check your connection and refresh.', 'term-line-err');
+      statusEl.style.color = '#ff6b6b';
+      appendLine('Could not load the Python runtime: ' + (err && err.message ? err.message : err), 'term-line-err');
+      appendLine('Check your internet connection, disable any ad/script blockers for this site, and refresh.', 'term-line-sys');
     }
   }
 
@@ -161,6 +179,7 @@ document.querySelectorAll('.footer').forEach(el => {
   });
 
   // Only load Pyodide once the terminal section actually scrolls into view
+  const termSection = document.getElementById('terminal');
   const termObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting && !pyodide) {
@@ -168,9 +187,9 @@ document.querySelectorAll('.footer').forEach(el => {
         termObserver.disconnect();
       }
     });
-  }, { threshold: 0.2 });
+  }, { threshold: 0, rootMargin: '200px 0px' });
 
-  termObserver.observe(document.getElementById('terminal'));
+  if (termSection) termObserver.observe(termSection);
 })();
 
 /* ── Theme toggle (dark / light) ── */
