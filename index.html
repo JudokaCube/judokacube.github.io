@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
   <script>
     (function () {
       var saved = localStorage.getItem('jdkcube-theme');
@@ -36,15 +36,27 @@
     <!-- tile grid -->
     <div class="tile-grid">
 
-      <!-- BOOK OF DRAGONS LAUNCH TILE -->
-      <button class="tile tile-launch tile-book-launch" id="openBook" aria-haspopup="dialog">
-        <div class="tile-spotlight" aria-hidden="true"></div>
-        <div class="tile-launch-icon">📖</div>
-        <div class="tile-launch-text">
-          <h3>Book of Dragons</h3>
-        </div>
-        <span class="tile-launch-arrow">↗</span>
-      </button>
+      <div class="tile-col-book">
+        <!-- BOOK OF DRAGONS LAUNCH TILE -->
+        <button class="tile tile-launch tile-book-launch" id="openBook" aria-haspopup="dialog">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-launch-icon">📖</div>
+          <div class="tile-launch-text">
+            <h3>Book of Dragons</h3>
+          </div>
+          <span class="tile-launch-arrow">↗</span>
+        </button>
+
+        <!-- MINECRAFT SKIN LAUNCH TILE -->
+        <button class="tile tile-launch tile-mc-launch" id="openMcSkin" aria-haspopup="dialog">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-launch-icon">🧊</div>
+          <div class="tile-launch-text">
+            <h3>Minecraft</h3>
+          </div>
+          <span class="tile-launch-arrow">↗</span>
+        </button>
+      </div>
 
       <div class="tile-col-about">
         <!-- ABOUT LAUNCH TILE -->
@@ -360,6 +372,24 @@
     </div>
   </div>
 
+  <!-- ░░ MINECRAFT SKIN MODAL ░░ -->
+  <div class="modal-overlay" id="mcSkinModal" role="dialog" aria-modal="true" aria-label="Minecraft skin viewer">
+    <div class="modal-box mc-modal-box">
+      <button class="modal-close" id="closeMcSkin" aria-label="Close minecraft skin viewer">✕</button>
+
+      <div class="mc-skin-card">
+        <div class="mc-skin-label">// minecraft</div>
+        <h2 class="mc-skin-title">JDKCube</h2>
+
+        <div class="mc-skin-canvas-wrap" id="mcSkinCanvasWrap">
+          <canvas id="mcSkinCanvas"></canvas>
+        </div>
+
+        <p class="mc-skin-hint">drag to rotate · scroll to zoom</p>
+      </div>
+    </div>
+  </div>
+
   <!-- ░░ MUSIC PLAYER ░░ -->
   <audio id="bgMusic" src="assets/music.mp3" loop preload="auto"></audio>
 
@@ -405,6 +435,7 @@
   </a>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
-  <script src="script.js?v=5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>
