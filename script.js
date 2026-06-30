@@ -4,6 +4,11 @@
 
 'use strict';
 
+/* Wrap everything to guarantee the DOM is ready before we touch it,
+   and so each feature is isolated — one failing section won't
+   silently take the rest of the page's interactivity down with it. */
+document.addEventListener('DOMContentLoaded', function () {
+
 /* ── Modal system (Terminal + Discord) ── */
 function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
   const openBtn  = document.getElementById(openBtnId);
@@ -46,18 +51,20 @@ function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
   });
 }
 
-setupModal('openTerminal', 'terminalModal', 'closeTerminal', () => {
-  if (typeof initPyodideTerminal === 'function') initPyodideTerminal();
-});
-
-setupModal('openDiscord', 'discordModal', 'closeDiscord');
-setupModal('openAbout', 'aboutModal', 'closeAbout');
+try {
+  setupModal('openTerminal', 'terminalModal', 'closeTerminal', () => {
+    if (typeof initPyodideTerminal === 'function') initPyodideTerminal();
+  });
+  setupModal('openDiscord', 'discordModal', 'closeDiscord');
+  setupModal('openAbout', 'aboutModal', 'closeAbout');
+} catch (e) { console.error('modal setup failed:', e); }
 
 
 
 /* ── Python terminal (Pyodide REPL) ── */
 let initPyodideTerminal = function () {};
 
+try {
 (function () {
   const statusEl = document.getElementById('termStatus');
   const outputEl = document.getElementById('termOutput');
@@ -200,8 +207,10 @@ builtins.help = _browser_help
     if (!pyodide) initPyodide();
   };
 })();
+} catch (e) { console.error('terminal setup failed:', e); }
 
 /* ── Per-tile spotlight + subtle 3D tilt ── */
+try {
 (function () {
   const tiles = document.querySelectorAll('.tile');
   const MAX_TILT = 4; // degrees, kept subtle
@@ -241,8 +250,10 @@ builtins.help = _browser_help
     });
   });
 })();
+} catch (e) { console.error('tile tilt setup failed:', e); }
 
 /* ── Theme toggle (dark / light) ── */
+try {
 (function () {
   const root   = document.documentElement;
   const toggle = document.getElementById('themeToggle');
@@ -259,8 +270,10 @@ builtins.help = _browser_help
     }
   });
 })();
+} catch (e) { console.error('theme toggle setup failed:', e); }
 
 /* ── Music player ── */
+try {
 (function () {
   const audio   = document.getElementById('bgMusic');
   const widget  = document.getElementById('musicWidget');
@@ -335,6 +348,9 @@ builtins.help = _browser_help
     slider.style.setProperty('--val', slider.value + '%');
   }
 })();
+} catch (e) { console.error('music player setup failed:', e); }
+
+try {
 const copyBtn = document.getElementById('copyBtn');
 if (copyBtn) {
   let resetTimer = null;
@@ -366,3 +382,6 @@ if (copyBtn) {
     }, 2000);
   });
 }
+} catch (e) { console.error('copy button setup failed:', e); }
+
+}); // end DOMContentLoaded
