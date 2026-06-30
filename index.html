@@ -17,265 +17,281 @@
     })();
   </script>
 </head>
-<body>
+<body class="dashboard-body">
 
-  <!-- ░░ HERO ░░ -->
-  <section id="home" class="hero">
-    <div class="hero-bg-grid"></div>
-    <div class="hero-glow"></div>
-    <div class="hero-content fade-in">
-      <span class="hero-eyebrow">hey, i'm</span>
-      <h1 class="hero-title">JDKCube</h1>
-      <p class="hero-desc">
-        just a guy who likes httyd, hollow knight, other games, scuba and linux.<br class="br-hide" />
-        this is my little corner of the internet :D
-      </p>
-      <div class="hero-btns">
-        <a href="#about"    class="btn btn-ghost" data-scroll>about me</a>
-        <a href="#projects" class="btn btn-ghost" data-scroll>projects</a>
-        <a href="#terminal" class="btn btn-ghost" data-scroll>terminal</a>
-        <a href="#discord"  class="btn btn-primary" data-scroll>discord</a>
-      </div>
-    </div>
-    <div class="scroll-hint" aria-hidden="true">
-      <span></span>
-    </div>
-  </section>
+  <div class="dash-bg-grid"></div>
+  <div class="dash-glow"></div>
 
-  <!-- ░░ ABOUT ░░ -->
-  <section id="about" class="section about">
-    <div class="container">
-      <div class="section-label">// about</div>
-      <h2 class="section-title">a bit about me</h2>
-      <p class="about-intro">
-        love playing games, starting to learn how to code, and im absolutely addicted to httyd.
-      </p>
-      <div class="interests-grid">
+  <!-- ░░ DASHBOARD ░░ -->
+  <main class="dashboard">
 
-        <div class="interest-card" style="--delay:0ms">
-          <div class="interest-icon">🐉</div>
-          <div class="interest-body">
-            <h3>How to Train Your Dragon</h3>
-            <p>triple stryke, death song, storm cutter and speed stingers are the best dragons oat</p>
-          </div>
+    <!-- compact hero -->
+    <header class="dash-hero fade-in">
+      <span class="dash-eyebrow">hey, i'm</span>
+      <h1 class="dash-title">JDKCube</h1>
+      <p class="dash-desc">httyd · hollow knight · scuba · linux · games</p>
+    </header>
+
+    <!-- tile grid -->
+    <div class="tile-grid">
+
+      <!-- ABOUT LAUNCH TILE -->
+      <button class="tile tile-launch tile-about-launch" id="openAbout" aria-haspopup="dialog">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-launch-icon">🐉</div>
+        <div class="tile-launch-text">
+          <h3>About Me</h3>
+          <p>httyd, hollow knight and more.</p>
         </div>
+        <span class="tile-launch-arrow">↗</span>
+      </button>
 
-        <div class="interest-card" style="--delay:80ms">
-          <div class="interest-icon">🐛</div>
-          <div class="interest-body">
-            <h3>Hollow Knight</h3>
-            <p>109% game completion and path of pain done, dont ask how long this took</p>
-          </div>
+      <!-- PROJECTS TILE -->
+      <section class="tile tile-projects">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-head">
+          <span class="tile-label">// projects</span>
         </div>
+        <div class="projects-grid">
 
-        <div class="interest-card" style="--delay:160ms">
-          <div class="interest-icon">🤿</div>
-          <div class="interest-body">
-            <h3>Scuba diving</h3>
-            <p>love scuba so much, and the animals are amazing</p>
-          </div>
-        </div>
-
-        <div class="interest-card" style="--delay:240ms">
-          <div class="interest-icon">⛏️</div>
-          <div class="interest-body">
-            <h3>Minecraft</h3>
-            <p>been playing since 1.16 will never get tired of it</p>
-          </div>
-        </div>
-
-        <div class="interest-card" style="--delay:320ms">
-          <div class="interest-icon">🐧</div>
-          <div class="interest-body">
-            <h3>Linux</h3>
-            <p>i use arch btw :)</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ░░ PROJECTS ░░ -->
-  <section id="projects" class="section projects">
-    <div class="container">
-      <div class="section-label">// projects</div>
-      <h2 class="section-title">stuff i've made</h2>
-      <div class="projects-grid">
-
-        <div class="project-card" style="--delay:0ms">
-          <div class="project-top">
-            <span class="project-tag">website</span>
-            <div class="project-dot"></div>
-          </div>
-          <h3>JDKCube site</h3>
-          <p>the site you are looking at rn.</p>
-          <a href="#home" class="project-link" data-scroll>view site ↗</a>
-        </div>
-
-        <div class="project-card" style="--delay:80ms">
-          <div class="project-top">
-            <span class="project-tag">discord bot</span>
-            <div class="project-dot"></div>
-          </div>
-          <h3>Skye</h3>
-          <p>a discord utility bot written in python using discord.py</p>
-          <a href="#" class="project-link">coming soon ↗</a>
-        </div>
-
-        <div class="project-card" style="--delay:160ms">
-          <div class="project-top">
-            <span class="project-tag">web</span>
-            <div class="project-dot"></div>
-          </div>
-          <h3>losangtsugtor.com</h3>
-          <p>a website i made for a very talented book author.</p>
-          <a href="https://losangtsugtor.com" target="_blank" rel="noopener" class="project-link">visit ↗</a>
-        </div>
-
-        <div class="project-card" style="--delay:240ms">
-          <div class="project-top">
-            <span class="project-tag">web</span>
-            <div class="project-dot"></div>
-          </div>
-          <h3>anakreativa.com</h3>
-          <p>another website i made but for a very talented artist.</p>
-          <a href="https://anakreativa.com" target="_blank" rel="noopener" class="project-link">visit ↗</a>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ░░ TERMINAL ░░ -->
-  <section id="terminal" class="section terminal-section">
-    <div class="container">
-      <div class="section-label">// terminal</div>
-      <h2 class="section-title">live python terminal</h2>
-      <p class="about-intro">
-        a real python interpreter running right in your browser. no backend, no server — just python compiled to webassembly. go ahead, break something.
-      </p>
-
-      <div class="term-wrapper">
-        <div class="term-window">
-
-          <div class="term-titlebar">
-            <div class="term-dots">
-              <span class="term-dot red"></span>
-              <span class="term-dot yellow"></span>
-              <span class="term-dot green"></span>
+          <div class="project-card">
+            <div class="project-top">
+              <span class="project-tag">website</span>
+              <div class="project-dot"></div>
             </div>
-            <span class="term-title">python3 — jdkcube</span>
-            <span class="term-status" id="termStatus">loading…</span>
+            <h3>JDKCube site</h3>
+            <p>the site you are looking at rn.</p>
           </div>
 
-          <div class="term-body" id="termBody">
-            <pre class="term-output" id="termOutput"></pre>
-            <div class="term-input-row">
-              <span class="term-prompt">&gt;&gt;&gt;</span>
-              <input
-                type="text"
-                class="term-input"
-                id="termInput"
-                autocomplete="off"
-                autocapitalize="off"
-                spellcheck="false"
-                placeholder="loading python runtime…"
-                disabled
-              />
+          <div class="project-card">
+            <div class="project-top">
+              <span class="project-tag">discord bot</span>
+              <div class="project-dot"></div>
             </div>
+            <h3>Skye</h3>
+            <p>a discord utility bot written in python using discord.py</p>
+            <a href="#" class="project-link">coming soon ↗</a>
+          </div>
+
+          <div class="project-card">
+            <div class="project-top">
+              <span class="project-tag">web</span>
+              <div class="project-dot"></div>
+            </div>
+            <h3>losangtsugtor.com</h3>
+            <p>a website i made for a very talented book author.</p>
+            <a href="https://losangtsugtor.com" target="_blank" rel="noopener" class="project-link">visit ↗</a>
+          </div>
+
+          <div class="project-card">
+            <div class="project-top">
+              <span class="project-tag">web</span>
+              <div class="project-dot"></div>
+            </div>
+            <h3>anakreativa.com</h3>
+            <p>another website i made but for a very talented artist.</p>
+            <a href="https://anakreativa.com" target="_blank" rel="noopener" class="project-link">visit ↗</a>
           </div>
 
         </div>
-        <p class="term-hint">↑ / ↓ for history · type <code>clear</code> to reset · <code>help()</code> works too</p>
-      </div>
-    </div>
-  </section>
+      </section>
 
-  <!-- ░░ DISCORD ░░ -->
-  <section id="discord" class="section discord-section">
-    <div class="container">
-      <div class="section-label">// discord</div>
-      <h2 class="section-title">find me on discord</h2>
-
-      <div class="discord-wrapper">
-        <!-- profile card -->
-        <div class="dc-card">
-
-          <!-- banner -->
-          <div class="dc-banner">
-            <img class="dc-banner-img" src="assets/banner.jpg" alt="" aria-hidden="true" />
-          </div>
-
-          <!-- avatar row -->
-          <div class="dc-avatar-row">
-            <div class="dc-avatar-wrap">
-              <div class="dc-avatar">
-                <img src="assets/pfp.jpg" alt="JDKCube avatar" class="dc-avatar-img" />
-              </div>
-              <span class="dc-status-dot dnd" title="Do Not Disturb"></span>
-            </div>
-            <div class="dc-badges"></div><!-- no invented badges -->
-          </div>
-
-          <!-- body -->
-          <div class="dc-body">
-
-            <div class="dc-names">
-              <span class="dc-display-name">JDKCube</span>
-              <span class="dc-username">judokacube</span>
-            </div>
-
-            <div class="dc-pronouns">he/him/lazy</div>
-
-            <div class="dc-custom-status">
-              <span class="dc-status-emoji">🤍</span>
-              <span class="dc-status-text">httyd | hk 109% PoP</span>
-            </div>
-
-            <div class="dc-divider"></div>
-
-            <div class="dc-about-label">ABOUT ME</div>
-            <div class="dc-bio">
-              <p>Not much to say, i like games, hollow knight and i like httyd. I also scuba dive ➴ jdkcube.net</p>
-              <p>rory, king 🤍</p>
-              <p>triple stryke best dragon oat</p>
-            </div>
-
-            <div class="dc-divider"></div>
-
-            <div class="dc-meta-label">MEMBER SINCE</div>
-            <div class="dc-meta-row">
-              <span class="dc-meta-value">Discord</span>
-            </div>
-
-            <div class="dc-user-id-row">
-              <span class="dc-meta-label-inline">USER ID</span>
-              <span class="dc-user-id">820292272209002526</span>
-            </div>
-
-            <button class="dc-copy-btn" id="copyBtn" aria-label="Copy username to clipboard">
-              <span class="dc-copy-label">Copy Username</span>
-              <span class="dc-copy-tick" aria-hidden="true">✓ Copied!</span>
-            </button>
-
-          </div>
+      <!-- TERMINAL LAUNCH TILE -->
+      <button class="tile tile-launch tile-terminal-launch" id="openTerminal" aria-haspopup="dialog">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-launch-icon">&gt;_</div>
+        <div class="tile-launch-text">
+          <h3>Python Terminal</h3>
+          <p>live python in your browser</p>
         </div>
-      </div>
+        <span class="tile-launch-arrow">↗</span>
+      </button>
+
+      <!-- DISCORD LAUNCH TILE -->
+      <button class="tile tile-launch tile-discord-launch" id="openDiscord" aria-haspopup="dialog">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-launch-avatar">
+          <img src="assets/pfp.jpg" alt="" />
+          <span class="tile-launch-dot"></span>
+        </div>
+        <div class="tile-launch-text">
+          <h3>Discord</h3>
+          <p>@judokacube</p>
+        </div>
+        <span class="tile-launch-arrow">↗</span>
+      </button>
 
     </div>
-  </section>
 
-  <!-- ░░ FOOTER ░░ -->
-  <footer class="footer">
-    <div class="container footer-inner">
+    <!-- footer -->
+    <footer class="dash-footer">
       <span class="footer-logo">JDKCube</span>
       <span class="footer-copy">
         <img src="assets/favicon.ico" alt="" class="footer-favicon" aria-hidden="true" />
         hello :D
       </span>
+    </footer>
+
+  </main>
+
+  <!-- ░░ TERMINAL MODAL ░░ -->
+  <div class="modal-overlay" id="terminalModal" role="dialog" aria-modal="true" aria-label="Python terminal">
+    <div class="modal-box term-modal-box">
+      <button class="modal-close" id="closeTerminal" aria-label="Close terminal">✕</button>
+
+      <div class="term-window">
+        <div class="term-titlebar">
+          <div class="term-dots">
+            <span class="term-dot red"></span>
+            <span class="term-dot yellow"></span>
+            <span class="term-dot green"></span>
+          </div>
+          <span class="term-title">python3 — jdkcube</span>
+          <span class="term-status" id="termStatus">loading…</span>
+        </div>
+
+        <div class="term-body" id="termBody">
+          <pre class="term-output" id="termOutput"></pre>
+          <div class="term-input-row">
+            <span class="term-prompt">&gt;&gt;&gt;</span>
+            <input
+              type="text"
+              class="term-input"
+              id="termInput"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="loading python runtime…"
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+      <p class="term-hint">↑ / ↓ for history · type <code>clear</code> to reset · <code>help()</code> works too</p>
     </div>
-  </footer>
+  </div>
+
+  <!-- ░░ DISCORD MODAL ░░ -->
+  <div class="modal-overlay" id="discordModal" role="dialog" aria-modal="true" aria-label="Discord profile">
+    <div class="modal-box dc-modal-box">
+      <button class="modal-close" id="closeDiscord" aria-label="Close discord profile">✕</button>
+
+      <div class="dc-card">
+
+        <div class="dc-banner">
+          <img class="dc-banner-img" src="assets/banner.jpg" alt="" aria-hidden="true" />
+        </div>
+
+        <div class="dc-avatar-row">
+          <div class="dc-avatar-wrap">
+            <div class="dc-avatar">
+              <img src="assets/pfp.jpg" alt="JDKCube avatar" class="dc-avatar-img" />
+            </div>
+            <span class="dc-status-dot dnd" title="Do Not Disturb"></span>
+          </div>
+          <div class="dc-badges"></div>
+        </div>
+
+        <div class="dc-body">
+
+          <div class="dc-names">
+            <span class="dc-display-name">JDKCube</span>
+            <span class="dc-username">judokacube</span>
+          </div>
+
+          <div class="dc-pronouns">he/him/lazy</div>
+
+          <div class="dc-custom-status">
+            <span class="dc-status-emoji">🤍</span>
+            <span class="dc-status-text">httyd | hk 109% PoP</span>
+          </div>
+
+          <div class="dc-divider"></div>
+
+          <div class="dc-about-label">ABOUT ME</div>
+          <div class="dc-bio">
+            <p>Not much to say, i like games, hollow knight and i like httyd. I also scuba dive ➴ jdkcube.net</p>
+            <p>rory, king 🤍</p>
+            <p>triple stryke best dragon oat</p>
+          </div>
+
+          <div class="dc-divider"></div>
+
+          <div class="dc-meta-label">MEMBER SINCE</div>
+          <div class="dc-meta-row">
+            <span class="dc-meta-value">Discord</span>
+          </div>
+
+          <div class="dc-user-id-row">
+            <span class="dc-meta-label-inline">USER ID</span>
+            <span class="dc-user-id">820292272209002526</span>
+          </div>
+
+          <button class="dc-copy-btn" id="copyBtn" aria-label="Copy username to clipboard">
+            <span class="dc-copy-label">Copy Username</span>
+            <span class="dc-copy-tick" aria-hidden="true">✓ Copied!</span>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ ABOUT MODAL ░░ -->
+  <div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-label="About me">
+    <div class="modal-box about-modal-box">
+      <button class="modal-close" id="closeAbout" aria-label="Close about me">✕</button>
+
+      <div class="about-modal-card">
+        <div class="about-modal-label">// about</div>
+        <h2 class="about-modal-title">a bit about me</h2>
+
+        <div class="interests-list">
+
+          <div class="interest-row">
+            <span class="interest-icon">🐉</span>
+            <div class="interest-body">
+              <h3>How to Train Your Dragon</h3>
+              <p>triple stryke, death song, storm cutter and speed stingers are the best dragons oat</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">🐛</span>
+            <div class="interest-body">
+              <h3>Hollow Knight</h3>
+              <p>109% game completion and path of pain done, dont ask how long this took</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">🤿</span>
+            <div class="interest-body">
+              <h3>Scuba diving</h3>
+              <p>love scuba so much, and the animals are amazing</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">⛏️</span>
+            <div class="interest-body">
+              <h3>Minecraft</h3>
+              <p>been playing since 1.16 will never get tired of it</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">🐧</span>
+            <div class="interest-body">
+              <h3>Linux</h3>
+              <p>i use arch btw :)</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ░░ MUSIC PLAYER ░░ -->
   <audio id="bgMusic" src="assets/music.mp3" loop preload="auto"></audio>
@@ -285,15 +301,26 @@
       <span class="music-icon">♪</span>
     </button>
     <div class="music-panel" id="musicPanel" role="tooltip">
-      <input
-        type="range"
-        class="music-slider"
-        id="volumeSlider"
-        min="0"
-        max="100"
-        value="40"
-        aria-label="Volume"
-      />
+      <div class="music-controls-row">
+        <button class="music-pause-btn" id="musicPauseBtn" aria-label="Pause music">
+          <svg class="icon-pause" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+            <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+          </svg>
+          <svg class="icon-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path d="M7 4.5v15l13-7.5z" fill="currentColor"/>
+          </svg>
+        </button>
+        <input
+          type="range"
+          class="music-slider"
+          id="volumeSlider"
+          min="0"
+          max="100"
+          value="40"
+          aria-label="Volume"
+        />
+      </div>
       <p class="music-label">Romantic Flight<br /><span>From How to Train Your Dragon · John Powell</span></p>
     </div>
   </div>
