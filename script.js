@@ -50,7 +50,7 @@ document.querySelectorAll(
 });
 
 /* Discord card */
-document.querySelectorAll('.dc-card').forEach(el => {
+document.querySelectorAll('.dc-card, .term-window').forEach(el => {
   el.classList.add('reveal');
   revealObserver.observe(el);
 });
@@ -60,6 +60,118 @@ document.querySelectorAll('.footer').forEach(el => {
   el.classList.add('reveal');
   revealObserver.observe(el);
 });
+
+/* ── Python terminal (Pyodide REPL) ── */
+(function () {
+  const statusEl = document.getElementById('termStatus');
+  const outputEl = document.getElementById('termOutput');
+  const inputEl  = document.getElementById('termInput');
+  const bodyEl   = document.getElementById('termBody');
+  if (!inputEl) return;
+
+  let pyodide   = null;
+  let history   = [];
+  let histIndex = -1;
+
+  function appendLine(text, cls) {
+    const span = document.createElement('div');
+    span.className = cls || '';
+    span.textContent = text;
+    outputEl.appendChild(span);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  function printWelcome() {
+    appendLine('Python 3.11 (Pyodide) — running entirely in your browser', 'term-line-sys');
+    appendLine('Type python code below and hit enter. No server involved.', 'term-line-sys');
+    appendLine('', '');
+  }
+
+  async function initPyodide() {
+    try {
+      pyodide = await loadPyodide();
+
+      // redirect stdout/stderr into our terminal
+      pyodide.setStdout({ batched: (s) => appendLine(s, 'term-line-out') });
+      pyodide.setStderr({ batched: (s) => appendLine(s, 'term-line-err') });
+
+      statusEl.textContent = 'ready';
+      statusEl.classList.add('ready');
+      inputEl.disabled = false;
+      inputEl.placeholder = 'type python here…';
+      inputEl.focus();
+      printWelcome();
+    } catch (err) {
+      statusEl.textContent = 'failed to load';
+      appendLine('Could not load the Python runtime. Check your connection and refresh.', 'term-line-err');
+    }
+  }
+
+  async function runCode(code) {
+    appendLine(code, 'term-line-in');
+
+    if (code.trim() === 'clear') {
+      outputEl.innerHTML = '';
+      return;
+    }
+
+    try {
+      let result = await pyodide.runPythonAsync(code);
+      if (result !== undefined && result !== null) {
+        appendLine(String(result), 'term-line-out');
+      }
+    } catch (err) {
+      // Pyodide errors are verbose Python tracebacks — show the last meaningful line
+      const msg = String(err);
+      const lines = msg.trim().split('\n');
+      appendLine(lines[lines.length - 1] || msg, 'term-line-err');
+    }
+  }
+
+  inputEl.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+      const code = inputEl.value;
+      if (!code.trim() || !pyodide) return;
+
+      history.push(code);
+      histIndex = history.length;
+      inputEl.value = '';
+      inputEl.disabled = true;
+
+      await runCode(code);
+
+      inputEl.disabled = false;
+      inputEl.focus();
+    } else if (e.key === 'ArrowUp') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIndex = Math.max(0, histIndex - 1);
+      inputEl.value = history[histIndex] || '';
+    } else if (e.key === 'ArrowDown') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIndex = Math.min(history.length, histIndex + 1);
+      inputEl.value = history[histIndex] || '';
+    }
+  });
+
+  // Clicking anywhere in the terminal body focuses the input
+  bodyEl.addEventListener('click', () => {
+    if (!inputEl.disabled) inputEl.focus();
+  });
+
+  // Only load Pyodide once the terminal section actually scrolls into view
+  const termObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !pyodide) {
+        initPyodide();
+        termObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+
+  termObserver.observe(document.getElementById('terminal'));
+})();
 
 /* ── Theme toggle (dark / light) ── */
 (function () {
