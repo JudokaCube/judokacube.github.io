@@ -6,7 +6,7 @@
 
 /* Wrap everything to guarantee the DOM is ready before we touch it,
    and so each feature is isolated — one failing section won't
-   silently take the rest of the page's interactivity down with it, for safety. */
+   silently take the rest of the page's interactivity down with it. */
 document.addEventListener('DOMContentLoaded', function () {
 
 /* ── Modal system (Terminal + Discord) ── */
@@ -58,6 +58,9 @@ try {
   setupModal('openDiscord', 'discordModal', 'closeDiscord');
   setupModal('openAbout', 'aboutModal', 'closeAbout');
   setupModal('openBook', 'bookModal', 'closeBook');
+  setupModal('openMcSkin', 'mcSkinModal', 'closeMcSkin', () => {
+    if (typeof initMcSkinViewer === 'function') initMcSkinViewer();
+  });
 } catch (e) { console.error('modal setup failed:', e); }
 
 
@@ -639,5 +642,65 @@ try {
   setInterval(fetchActivity, POLL_MS);
 })();
 } catch (e) { console.error('discord activity widget setup failed:', e); }
+
+/* ── Minecraft skin viewer (3D, via skinview3d) ── */
+let initMcSkinViewer; // assigned below, used as the modal's onFirstOpen callback
+try {
+(function () {
+  const MC_USERNAME = 'JDKCube';
+  const canvas  = document.getElementById('mcSkinCanvas');
+  const loading = document.getElementById('mcSkinLoading');
+  if (!canvas) return;
+
+  let viewer = null;
+
+  initMcSkinViewer = function () {
+    if (viewer || typeof skinview3d === 'undefined') {
+      if (typeof skinview3d === 'undefined') {
+        if (loading) loading.textContent = 'couldn\'t load 3d viewer';
+      }
+      return;
+    }
+
+    const wrap = canvas.parentElement;
+    const size = wrap ? Math.min(wrap.clientWidth, wrap.clientHeight || wrap.clientWidth) : 280;
+
+    try {
+      viewer = new skinview3d.SkinViewer({
+        canvas: canvas,
+        width: size,
+        height: size,
+        skin: `https://mc-heads.net/skin/${MC_USERNAME}`
+      });
+
+      viewer.autoRotate = true;
+      viewer.autoRotateSpeed = 0.8;
+      viewer.controls.enableZoom = true;
+      viewer.zoom = 0.85;
+
+      // walking animation so it doesn't look frozen
+      if (skinview3d.WalkingAnimation) {
+        viewer.animation = new skinview3d.WalkingAnimation();
+        viewer.animation.speed = 0.6;
+      }
+
+      viewer.loadSkin(`https://mc-heads.net/skin/${MC_USERNAME}`)
+        .then(() => { if (loading) loading.hidden = true; })
+        .catch(() => { if (loading) loading.textContent = 'could not load skin'; });
+    } catch (err) {
+      console.error('skin viewer init failed:', err);
+      if (loading) loading.textContent = 'could not load 3d viewer';
+    }
+  };
+
+  // Keep the canvas crisp if the modal/tile is resized.
+  window.addEventListener('resize', () => {
+    if (!viewer) return;
+    const wrap = canvas.parentElement;
+    const size = wrap ? Math.min(wrap.clientWidth, wrap.clientHeight || wrap.clientWidth) : 280;
+    viewer.setSize(size, size);
+  });
+})();
+} catch (e) { console.error('minecraft skin viewer setup failed:', e); }
 
 }); // end DOMContentLoaded
