@@ -941,17 +941,18 @@ html, body.dashboard-body {
 /* ── Tile grid ── */
 .tile-grid {
   display: grid;
-  grid-template-columns: 1fr 1.4fr 1fr;
+  grid-template-columns: 0.8fr 1fr 1.4fr 1fr;
   grid-template-rows: 1fr 1fr;
   grid-template-areas:
-    "about projects terminal"
-    "about projects discord";
+    "book about projects terminal"
+    "book about projects discord";
   gap: clamp(1rem, 2vh, 1.5rem);
   width: 100%;
   min-height: min(620px, 70vh);
 }
 
 .tile-projects { grid-area: projects; }
+.tile-book-launch { grid-area: book; }
 .tile-col-about { grid-area: about; display: flex; flex-direction: column; gap: clamp(1rem, 2vh, 1.5rem); min-height: 0; }
 .tile-about-launch    { flex: 1.5; }
 .tile-discord-activity { flex: 1; }
@@ -1512,6 +1513,7 @@ body.modal-open .easter-egg {
   .tile-grid {
     grid-template-columns: 1fr;
     grid-template-areas:
+      "book"
       "projects"
       "about"
       "terminal"
@@ -1654,6 +1656,174 @@ body.modal-open .easter-egg {
 }
 .interest-row:hover::after {
   color: var(--cyan);
+}
+
+/* ============================================
+   BOOK OF DRAGONS MODAL
+   ============================================ */
+.book-modal-box {
+  width: min(560px, 92vw);
+}
+
+.book-modal-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-cyan);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.6rem;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 0 24px var(--cyan-glow2);
+  display: flex;
+  flex-direction: column;
+  max-height: min(640px, 80vh);
+}
+
+.book-modal-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}
+
+.book-modal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
+
+.book-modal-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.book-search-row {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+  transition: border-color var(--transition);
+}
+.book-search-row:focus-within {
+  border-color: var(--border-cyan);
+  box-shadow: 0 0 0 1px var(--border-cyan);
+}
+
+.book-search-icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.book-search-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.book-search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.book-search-count {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}
+
+.book-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-right: 0.3rem;
+}
+
+.dragon-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  transition: all var(--transition);
+}
+.dragon-card:hover {
+  border-color: var(--border-cyan);
+  border-left-color: var(--cyan);
+  background: var(--bg-card-hov);
+}
+
+.dragon-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+.dragon-card-name {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dragon-card-class {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  background: var(--cyan-muted);
+  border: 1px solid var(--border-cyan);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.dragon-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+.dragon-card-stats span b {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.dragon-card-behaviour {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.book-list-empty {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  padding: 2rem 0;
 }
 /* ============================================
    EASTER EGG (corner pfp)
