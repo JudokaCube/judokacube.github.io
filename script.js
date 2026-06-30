@@ -6,7 +6,7 @@
 
 /* Wrap everything to guarantee the DOM is ready before we touch it,
    and so each feature is isolated — one failing section won't
-   silently take the rest of the page's interactivity down with it. */
+   silently take the rest of the page's interactivity down with it, for safety. */
 document.addEventListener('DOMContentLoaded', function () {
 
 /* ── Modal system (Terminal + Discord) ── */
