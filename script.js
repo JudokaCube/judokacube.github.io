@@ -350,6 +350,24 @@ try {
 })();
 } catch (e) { console.error('music player setup failed:', e); }
 
+/* ── Easter egg (corner pfp) ──
+   This link previously relied only on CSS :hover/:focus-visible to reveal
+   the "click me" bubble and animate the avatar. Touch devices have no real
+   hover state, so the first tap just triggered the hover styles instead of
+   following the link — visitors had to tap twice. We add a small JS-driven
+   "touched" state so a single tap reveals the bubble immediately and the
+   link still navigates normally right after. */
+try {
+(function () {
+  const egg = document.getElementById('easterEgg');
+  if (!egg) return;
+
+  egg.addEventListener('touchstart', () => {
+    egg.classList.add('touched');
+  }, { passive: true });
+})();
+} catch (e) { console.error('easter egg setup failed:', e); }
+
 try {
 const copyBtn = document.getElementById('copyBtn');
 if (copyBtn) {
