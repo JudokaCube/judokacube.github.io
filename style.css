@@ -941,8 +941,8 @@ html, body.dashboard-body {
 /* ── Tile grid ── */
 .tile-grid {
   display: grid;
-  grid-template-columns: 0.8fr 1fr 1.4fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-areas:
     "book about projects terminal"
     "book about projects discord";
@@ -951,11 +951,11 @@ html, body.dashboard-body {
   min-height: min(620px, 70vh);
 }
 
-.tile-projects { grid-area: projects; }
+.tile-projects { grid-area: projects; min-height: 0; }
 .tile-book-launch { grid-area: book; }
 .tile-col-about { grid-area: about; display: flex; flex-direction: column; gap: clamp(1rem, 2vh, 1.5rem); min-height: 0; }
-.tile-about-launch    { flex: 1.5; }
-.tile-discord-activity { flex: 1; }
+.tile-about-launch    { flex: 1.5; min-height: 0; }
+.tile-discord-activity { flex: 1; min-height: 0; }
 .tile-terminal-launch { grid-area: terminal; }
 .tile-discord-launch  { grid-area: discord; }
 
@@ -1209,6 +1209,13 @@ html, body.dashboard-body {
 .tile-discord-activity {
   justify-content: flex-start;
   gap: 0;
+  overflow: hidden;
+}
+
+.da-status-row,
+.da-activity,
+.da-empty-msg {
+  flex-shrink: 0;
 }
 
 .da-status-row {
