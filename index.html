@@ -36,6 +36,16 @@
     <!-- tile grid -->
     <div class="tile-grid">
 
+      <!-- BOOK OF DRAGONS LAUNCH TILE -->
+      <button class="tile tile-launch tile-book-launch" id="openBook" aria-haspopup="dialog">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-launch-icon">📖</div>
+        <div class="tile-launch-text">
+          <h3>Book of Dragons</h3>
+        </div>
+        <span class="tile-launch-arrow">↗</span>
+      </button>
+
       <div class="tile-col-about">
         <!-- ABOUT LAUNCH TILE -->
         <button class="tile tile-launch tile-about-launch" id="openAbout" aria-haspopup="dialog">
@@ -318,6 +328,34 @@
           </div>
 
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ BOOK OF DRAGONS MODAL ░░ -->
+  <div class="modal-overlay" id="bookModal" role="dialog" aria-modal="true" aria-label="Book of Dragons">
+    <div class="modal-box book-modal-box">
+      <button class="modal-close" id="closeBook" aria-label="Close book of dragons">✕</button>
+
+      <div class="book-modal-card">
+        <div class="book-modal-label">// book of dragons</div>
+        <h2 class="book-modal-title">Most Species from HTTYD</h2>
+        <p class="book-modal-sub">Most dragon species from the three movies, Riders of Berk, Defenders of Berk &amp; Race to the Edge. Info from the fandom</p>
+
+        <div class="book-search-row">
+          <span class="book-search-icon">🔍</span>
+          <input
+            type="text"
+            id="bookSearch"
+            class="book-search-input"
+            placeholder="search a dragon or class…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <span class="book-search-count" id="bookCount"></span>
+        </div>
+
+        <div class="book-list" id="bookList"></div>
       </div>
     </div>
   </div>
