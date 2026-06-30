@@ -65,7 +65,7 @@
   --bg-card-hov: rgba(0, 0, 0, 0.055);
   --bg-card-solid:     #ffffff;
   --bg-card-solid-hov: #f5f8fa;
-  --bg-glass:    rgba(255, 255, 255, 0.75);
+  --bg-glass:    rgba(255, 255, 255, 0.85);
 
   --text:        #1a1f24;
   --text-muted:  #5c6b7a;
@@ -1261,7 +1261,10 @@ html, body.dashboard-body {
 
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease, background-color 0.35s ease;
+}
+:root[data-theme="light"] .modal-overlay {
+  background: rgba(20, 24, 30, 0.28);
 }
 .modal-overlay.open {
   opacity: 1;
