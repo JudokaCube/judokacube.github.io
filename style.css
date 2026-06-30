@@ -1,1920 +1,643 @@
 /* ============================================
-   JDKCube — style.css
-   Dark mode · Cyan accent · Glassmorphism
+   JDKCube — script.js
    ============================================ */
 
-/* ── Reset & base ── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-::selection {
-  background: var(--cyan-muted);
-  color: var(--text);
-}
-
-:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-:root {
-  --cyan:        #00e5ff;
-  --cyan-dim:    #00b8d4;
-  --cyan-muted:  rgba(0, 229, 255, 0.12);
-  --cyan-glow:   rgba(0, 229, 255, 0.25);
-  --cyan-glow2:  rgba(0, 229, 255, 0.08);
-
-  --bg:          #090b0e;
-  --bg-card:     rgba(255,255,255,0.04);
-  --bg-card-hov: rgba(255,255,255,0.07);
-  --bg-card-solid:     #13161b;
-  --bg-card-solid-hov: #181c22;
-  --bg-glass:    rgba(10, 14, 20, 0.72);
-
-  --text:        #e8eaed;
-  --text-muted:  #7a8899;
-  --text-dim:    #4a5568;
-  --border:      rgba(255,255,255,0.08);
-  --border-cyan: rgba(0, 229, 255, 0.20);
-
-  --radius-sm:   8px;
-  --radius:      14px;
-  --radius-lg:   20px;
-  --radius-xl:   28px;
-
-  --font-main:  'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono:  'Fira Code', 'Courier New', monospace;
-
-  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ── Light theme override ── */
-:root[data-theme="light"] {
-  --cyan:        #00b8d4;
-  --cyan-dim:    #0097a7;
-  --cyan-muted:  rgba(0, 184, 212, 0.10);
-  --cyan-glow:   rgba(0, 184, 212, 0.20);
-  --cyan-glow2:  rgba(0, 184, 212, 0.08);
-
-  --bg:          #f5f7f9;
-  --bg-card:     rgba(0, 0, 0, 0.03);
-  --bg-card-hov: rgba(0, 0, 0, 0.055);
-  --bg-card-solid:     #ffffff;
-  --bg-card-solid-hov: #f5f8fa;
-  --bg-glass:    rgba(255, 255, 255, 0.85);
-
-  --text:        #1a1f24;
-  --text-muted:  #5c6b7a;
-  --text-dim:    #8a96a3;
-  --border:      rgba(0, 0, 0, 0.08);
-  --border-cyan: rgba(0, 184, 212, 0.28);
-  --hero-dot:    rgba(0, 0, 0, 0.045);
-}
-
-/* Smooth theme-switch transition */
-body,
-.dc-card,
-.interest-card,
-.project-card,
-.btn-ghost,
-.music-btn,
-.music-panel,
-.theme-toggle {
-  transition:
-    background-color 0.35s ease,
-    color 0.35s ease,
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
-}
-
-
-
-body {
-  font-family: var(--font-main);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  transition: background-color 0.35s ease, color 0.35s ease;
-}
-
-a { color: inherit; text-decoration: none; }
-img { display: block; max-width: 100%; }
-button { cursor: pointer; font-family: inherit; }
-
-:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ── Container ── */
-.container {
-  width: 100%;
-  max-width: 860px;
-  margin-inline: auto;
-  padding-inline: clamp(1.25rem, 5vw, 2.5rem);
-}
-
-/* ── Section shared ── */
-.section {
-  padding-block: clamp(5rem, 10vw, 8rem);
-}
-
-.section-label {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--cyan);
-  letter-spacing: 0.08em;
-  margin-bottom: 0.75rem;
-  opacity: 0.8;
-}
-
-.section-title {
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  margin-bottom: 1.5rem;
-  color: var(--text);
-}
-
-/* ── Fade-in animation ── */
-.fade-in {
-  animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── Scroll-hint arrow ── */
-.scroll-hint {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  opacity: 0.35;
-  animation: bounce 2.2s ease-in-out infinite;
-}
-.scroll-hint span {
-  display: block;
-  width: 1.5px;
-  height: 40px;
-  background: linear-gradient(to bottom, var(--cyan), transparent);
-}
-@keyframes bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%       { transform: translateX(-50%) translateY(7px); }
-}
-
-/* ============================================
-   TERMINAL
-   ============================================ */
-
-.term-wrapper {
-  margin-top: 1rem;
-}
-
-.term-window {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-cyan);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  max-width: 100%;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 0 24px var(--cyan-glow2);
-}
-
-/* Titlebar */
-.term-titlebar {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.7rem 1rem;
-  background: rgba(255,255,255,0.03);
-  border-bottom: 1px solid var(--border);
-}
-
-.term-dots {
-  display: flex;
-  gap: 6px;
-}
-.term-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  opacity: 0.85;
-}
-.term-dot.red    { background: #ff5f57; }
-.term-dot.yellow { background: #febc2e; }
-.term-dot.green  { background: #28c840; }
-
-.term-title {
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  flex: 1;
-  text-align: center;
-}
-
-.term-status {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  letter-spacing: 0.03em;
-}
-.term-status.ready {
-  color: var(--cyan);
-}
-.term-status.ready::before {
-  content: '●';
-  margin-right: 4px;
-  font-size: 0.6rem;
-  filter: drop-shadow(0 0 4px var(--cyan));
-}
-
-/* Body */
-.term-body {
-  padding: 1.1rem 1.2rem;
-  max-height: 420px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  cursor: text;
-  position: relative;
-}
-.term-body::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.018) 0px,
-    rgba(255,255,255,0.018) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: overlay;
-}
-.term-body::-webkit-scrollbar { width: 8px; }
-.term-body::-webkit-scrollbar-track { background: transparent; }
-.term-body::-webkit-scrollbar-thumb {
-  background: var(--border-cyan);
-  border-radius: 999px;
-}
-
-.term-output {
-  font-family: var(--font-mono);
-  font-size: 0.84rem;
-  line-height: 1.6;
-  color: var(--text);
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0;
-}
-
-.term-line-in {
-  color: var(--cyan);
-}
-.term-line-in::before {
-  content: '>>> ';
-  opacity: 0.6;
-}
-.term-line-err {
-  color: #ff6b6b;
-}
-.term-line-out {
-  color: var(--text-muted);
-}
-.term-line-sys {
-  color: var(--text-dim);
-  font-style: italic;
-}
-
-.term-input-row {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-top: 0.35rem;
-}
-
-.term-prompt {
-  font-family: var(--font-mono);
-  font-size: 0.84rem;
-  color: var(--cyan);
-  opacity: 0.85;
-  flex-shrink: 0;
-  transition: opacity 0.2s ease, text-shadow 0.2s ease;
-}
-.term-input-row:focus-within .term-prompt {
-  opacity: 1;
-  text-shadow: 0 0 8px var(--cyan-glow);
-}
-
-.term-input {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-family: var(--font-mono);
-  font-size: 0.84rem;
-  color: var(--text);
-  caret-color: var(--cyan);
-}
-.term-input::placeholder {
-  color: var(--text-dim);
-}
-.term-input:disabled {
-  opacity: 0.4;
-}
-
-.term-hint {
-  margin-top: 0.7rem;
-  font-size: 0.74rem;
-  color: var(--text-dim);
-  text-align: center;
-}
-.term-hint code {
-  font-family: var(--font-mono);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  padding: 0.05rem 0.4rem;
-  border-radius: 5px;
-  color: var(--cyan);
-}
-
-/* ============================================
-   DISCORD SECTION
-   ============================================ */
-
-.discord-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-/* ── Discord card shell ── */
-.dc-card {
-  width: 100%;
-  max-width: 340px;
-  background: #18191c;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow:
-    0 8px 40px rgba(0,0,0,0.6),
-    0 0 0 1px rgba(255,255,255,0.06);
-  font-family: var(--font-main);
-  position: relative;
-}
-
-/* Banner */
-.dc-banner {
-  height: 96px;
-  position: relative;
-  overflow: hidden;
-}
-.dc-banner-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-
-/* Avatar row */
-.dc-avatar-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 0 16px;
-  margin-top: -42px;
-  position: relative;
-  z-index: 2;
-}
-
-.dc-avatar-wrap {
-  position: relative;
-  display: inline-block;
-}
-
-.dc-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 6px solid #18191c;
-  overflow: hidden;
-  box-shadow: 0 0 0 2px rgba(0,229,255,0.15);
-  background: #0a2233;
-}
-
-.dc-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Status dot */
-.dc-status-dot {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 3px solid #18191c;
-}
-.dc-status-dot.dnd {
-  background: #ed4245;
-  box-shadow: 0 0 6px rgba(237,66,69,0.6);
-}
-/* DND bar inside dot */
-.dc-status-dot.dnd::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  width: 6px;
-  height: 2px;
-  background: #18191c;
-  border-radius: 2px;
-}
-
-/* Body */
-.dc-body {
-  padding: 12px 16px 16px;
-}
-
-.dc-names {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 4px;
-}
-
-.dc-display-name {
-  font-size: 1.12rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.01em;
-}
-
-.dc-username {
-  font-size: 0.82rem;
-  color: #b5bac1;
-}
-
-.dc-pronouns {
-  display: inline-block;
-  font-size: 0.7rem;
-  color: #b5bac1;
-  background: rgba(255,255,255,0.06);
-  border-radius: 4px;
-  padding: 1px 6px;
-  margin-bottom: 8px;
-  margin-top: 2px;
-}
-
-/* Custom status */
-.dc-custom-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  color: #b5bac1;
-  margin-bottom: 2px;
-}
-.dc-status-emoji {
-  font-size: 0.9rem;
-  line-height: 1;
-}
-.dc-status-text {
-  line-height: 1.3;
-}
-
-/* Divider */
-.dc-divider {
-  height: 1px;
-  background: rgba(255,255,255,0.07);
-  margin-block: 12px;
-}
-
-/* About me */
-.dc-about-label,
-.dc-meta-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #b5bac1;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.dc-bio {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-left: 2px solid rgba(0,229,255,0.25);
-  padding-left: 10px;
-}
-.dc-bio p {
-  font-size: 0.82rem;
-  color: #dbdee1;
-  line-height: 1.45;
-}
-
-.dc-meta-row {
-  margin-bottom: 8px;
-}
-.dc-meta-value {
-  font-size: 0.82rem;
-  color: #dbdee1;
-}
-
-/* User ID row */
-.dc-user-id-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.dc-meta-label-inline {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #b5bac1;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.dc-user-id {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: #dbdee1;
-  word-break: break-all;
-}
-
-/* Copy button */
-.dc-copy-btn {
-  width: 100%;
-  padding: 9px;
-  border-radius: 6px;
-  border: none;
-  background: #4e5058;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
-  transition: background var(--transition), box-shadow var(--transition);
-}
-.dc-copy-btn:hover {
-  background: #5c5e67;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-}
-.dc-copy-btn:active {
-  transform: translateY(0);
-}
-.dc-copy-btn.copied {
-  background: #23a559;
-  box-shadow: 0 0 16px rgba(35,165,89,0.4);
-}
-
-.dc-copy-tick {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  pointer-events: none;
-}
-.dc-copy-btn.copied .dc-copy-label {
-  opacity: 0;
-}
-.dc-copy-btn.copied .dc-copy-tick {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ============================================
-   MUSIC WIDGET
-   ============================================ */
-.music-widget {
-  position: fixed;
-  top: 1.25rem;
-  left: 1.25rem;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-}
-
-/* Toggle button */
-.music-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  font-size: 1rem;
-  transition: all var(--transition);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
-  position: relative;
-  z-index: 2;
-}
-.music-btn:hover,
-.music-widget.open .music-btn {
-  border-color: var(--border-cyan);
-  color: var(--cyan);
-  box-shadow: 0 0 14px var(--cyan-glow);
-  transform: scale(1.06);
-}
-.music-btn.playing .music-icon {
-  animation: spin-note 3s linear infinite;
-}
-@keyframes spin-note {
-  0%   { transform: rotate(0deg) scale(1); }
-  50%  { transform: rotate(180deg) scale(1.15); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-/* Panel */
-.music-panel {
-  margin-top: 0.5rem;
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-cyan);
-  border-radius: var(--radius);
-  padding: 1rem 1.1rem 0.85rem;
-  min-width: 200px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px var(--cyan-glow2);
-
-  opacity: 0;
-  transform: translateY(-6px) scale(0.97);
-  pointer-events: none;
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s ease;
-}
-.music-widget.open .music-panel {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: all;
-}
-
-/* Controls row (pause button + slider) */
-.music-controls-row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 0.75rem;
-}
-
-.music-pause-btn {
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid var(--border-cyan);
-  background: var(--cyan-muted);
-  color: var(--cyan);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-.music-pause-btn:hover {
-  background: var(--cyan-glow);
-  box-shadow: 0 0 12px var(--cyan-glow);
-  transform: scale(1.08);
-}
-.music-pause-btn:active {
-  transform: scale(0.94);
-}
-.music-pause-btn .icon-play {
-  display: none;
-}
-.music-pause-btn.paused .icon-pause {
-  display: none;
-}
-.music-pause-btn.paused .icon-play {
-  display: block;
-}
-
-/* Slider track */
-.music-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--border);
-  outline: none;
-  cursor: pointer;
-  /* filled portion via JS on --val */
-  background: linear-gradient(
-    to right,
-    var(--cyan) 0%,
-    var(--cyan) var(--val, 40%),
-    rgba(255,255,255,0.1) var(--val, 40%),
-    rgba(255,255,255,0.1) 100%
-  );
-}
-.music-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan-glow);
-  cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.music-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
-  box-shadow: 0 0 14px var(--cyan-glow);
-}
-.music-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: none;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan-glow);
-  cursor: pointer;
-}
-
-/* Track label */
-.music-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.4;
-  white-space: nowrap;
-}
-.music-label span {
-  font-weight: 400;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-}
-
-/* ============================================
-   THEME TOGGLE
-   ============================================ */
-.theme-toggle {
-  position: fixed;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 999;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
-  transition: all var(--transition);
-}
-.theme-toggle:hover {
-  border-color: var(--border-cyan);
-  box-shadow: 0 0 14px var(--cyan-glow);
-  transform: scale(1.06);
-}
-
-.theme-icon {
-  position: absolute;
-  font-size: 1.05rem;
-  line-height: 1;
-  transition:
-    opacity 0.35s ease,
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.theme-icon-moon {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-}
-.theme-icon-sun {
-  opacity: 0;
-  transform: rotate(-90deg) scale(0.4);
-}
-
-:root[data-theme="light"] .theme-icon-moon {
-  opacity: 0;
-  transform: rotate(90deg) scale(0.4);
-}
-:root[data-theme="light"] .theme-icon-sun {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-}
-
-/* ============================================
-   DASHBOARD LAYOUT (single viewport, no scroll)
-   ============================================ */
-html, body.dashboard-body {
-  min-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.dash-bg-grid {
-  position: fixed;
-  inset: 0;
-  background-image:
-    radial-gradient(circle, var(--hero-dot, rgba(255,255,255,0.05)) 1px, transparent 1px);
-  background-size: 30px 30px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.dash-glow {
-  position: fixed;
-  top: 6%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-  animation: glow-breathe 7s ease-in-out infinite;
-}
-@keyframes glow-breathe {
-  0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
-  50%      { opacity: 1;   transform: translateX(-50%) scale(1.06); }
-}
-
-.dashboard {
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-  min-height: 100svh;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(1.25rem, 3vh, 2rem);
-  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 5vw, 4rem);
-  max-width: 1480px;
-  margin-inline: auto;
-}
-
-/* ── Compact hero ── */
-.dash-hero {
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.dash-eyebrow {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--cyan);
-  opacity: 0.75;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.1rem;
-}
-
-.dash-title {
-  font-size: clamp(1.8rem, 4.5vh, 2.6rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  background: linear-gradient(135deg, var(--text) 40%, var(--cyan) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.dash-desc {
-  font-size: clamp(0.72rem, 1.6vh, 0.85rem);
-  color: var(--text-muted);
-  margin-top: 0.25rem;
-  font-family: var(--font-mono);
-  letter-spacing: 0.01em;
-}
-
-/* ── Tile grid ── */
-.tile-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-areas:
-    "book about projects terminal"
-    "book about projects discord";
-  gap: clamp(1rem, 2vh, 1.5rem);
-  width: 100%;
-  min-height: min(620px, 70vh);
-}
-
-.tile-projects { grid-area: projects; min-height: 0; }
-.tile-book-launch { grid-area: book; }
-.tile-col-about { grid-area: about; display: flex; flex-direction: column; gap: clamp(1rem, 2vh, 1.5rem); min-height: 0; }
-.tile-about-launch    { flex: 1.5; min-height: 0; }
-.tile-discord-activity { flex: 1; min-height: 0; }
-.tile-terminal-launch { grid-area: terminal; }
-.tile-discord-launch  { grid-area: discord; }
-
-.tile {
-  background: var(--bg-card-solid);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: clamp(1.3rem, 2.6vh, 1.85rem);
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-  position: relative;
-  will-change: transform;
-  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition), transform 0.12s linear;
-}
-.tile.tile-resetting {
-  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.tile:hover {
-  border-color: var(--border-cyan);
-  box-shadow: 0 10px 32px rgba(0,0,0,0.35), 0 0 0 1px var(--border-cyan), 0 0 24px var(--cyan-glow2);
-  transform: translateY(-2px);
-}
-.tile-launch:active {
-  transform: translateY(0) scale(0.98);
-}
-
-/* cursor-tracking spotlight removed per request — kept hidden so the
-   markup doesn't need to change */
-.tile-spotlight {
-  display: none;
-}
-
-.tile > :not(.tile-spotlight) {
-  position: relative;
-  z-index: 1;
-}
-
-.tile-head {
-  flex-shrink: 0;
-  margin-bottom: 0.9rem;
-}
-
-.tile-label {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--cyan);
-  letter-spacing: 0.07em;
-  opacity: 0.85;
-  transition: letter-spacing var(--transition), text-shadow var(--transition);
-}
-.tile:hover .tile-label {
-  letter-spacing: 0.1em;
-  text-shadow: 0 0 10px var(--cyan-glow2);
-}
-
-/* ── Projects tile content ── */
-.tile-projects .projects-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.7rem;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-}
-
-.tile-projects .project-card {
-  background: var(--bg-glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.85rem 0.9rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  min-height: 0;
-  min-width: 0;
-  transition: all var(--transition);
-}
-.tile-projects .project-card:hover {
-  border-color: var(--border-cyan);
-  background: var(--bg-card-hov);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.35), 0 0 0 1px var(--border-cyan);
-}
-
-.tile-projects .project-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.15rem;
-}
-
-.tile-projects .project-tag {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--cyan);
-  background: var(--cyan-muted);
-  border: 1px solid var(--border-cyan);
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  transition: background var(--transition), box-shadow var(--transition);
-}
-.project-card:hover .project-tag {
-  background: var(--cyan-glow2);
-  box-shadow: 0 0 10px var(--cyan-glow2);
-}
-
-.tile-projects .project-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 6px var(--cyan);
-  flex-shrink: 0;
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.project-card:hover .project-dot {
-  transform: scale(1.3);
-  box-shadow: 0 0 12px var(--cyan);
-}
-
-.tile-projects .project-card h3 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tile-projects .project-card p {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.35;
-  flex: 1;
-  overflow: hidden;
-}
-
-.tile-projects .project-link {
-  font-size: 0.72rem;
-  color: var(--cyan);
-  opacity: 0.85;
-  margin-top: auto;
-  display: inline-block;
-  width: fit-content;
-  transition: transform var(--transition), opacity var(--transition), text-shadow var(--transition);
-}
-.tile-projects .project-link:hover {
-  opacity: 1;
-  transform: translateX(3px);
-  text-shadow: 0 0 10px var(--cyan-glow);
-}
-
-/* ── Launch tiles (Terminal / Discord) ── */
-.tile-launch {
-  align-items: center;
-  flex-direction: row;
-  gap: 1rem;
-  cursor: pointer;
-  text-align: left;
-  position: relative;
-}
-.tile-launch:hover {
-  background: var(--bg-card-solid-hov);
-}
-
-.tile-launch-icon {
-  flex-shrink: 0;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius);
-  background: var(--cyan-muted);
-  border: 1px solid var(--border-cyan);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 1.2rem;
-  color: var(--cyan);
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.tile-launch:hover .tile-launch-icon {
-  transform: scale(1.08) rotate(-3deg);
-  box-shadow: 0 0 18px var(--cyan-glow);
-}
-
-.tile-launch-avatar {
-  flex-shrink: 0;
-  position: relative;
-  width: 52px;
-  height: 52px;
-}
-.tile-launch-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--border-cyan);
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.tile-launch:hover .tile-launch-avatar img {
-  transform: scale(1.08);
-  box-shadow: 0 0 16px var(--cyan-glow);
-}
-.tile-launch-dot {
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ed4245;
-  border: 2px solid var(--bg);
-}
-
-.tile-launch-text {
-  flex: 1;
-  min-width: 0;
-}
-.tile-launch-text h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.15rem;
-}
-.tile-launch-text p {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tile-launch-arrow {
-  flex-shrink: 0;
-  color: var(--cyan);
-  font-size: 1.1rem;
-  opacity: 0.7;
-  transition: transform var(--transition);
-}
-.tile-launch:hover .tile-launch-arrow {
-  transform: translate(2px, -2px);
-  opacity: 1;
-}
-
-/* ── Discord activity tile (live via Lanyard) ── */
-.tile-discord-activity {
-  justify-content: flex-start;
-  gap: 0;
-  overflow: hidden;
-}
-
-.da-status-row,
-.da-activity,
-.da-empty-msg {
-  flex-shrink: 0;
-}
-
-.da-status-row {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 0.85rem;
-}
-
-.da-status-dot {
-  flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--text-dim);
-  transition: background var(--transition), box-shadow var(--transition);
-}
-.da-status-dot.online  { background: #3ba55d; box-shadow: 0 0 8px rgba(59, 165, 93, 0.55); }
-.da-status-dot.idle    { background: #faa61a; box-shadow: 0 0 8px rgba(250, 166, 26, 0.5); }
-.da-status-dot.dnd     { background: #ed4245; box-shadow: 0 0 8px rgba(237, 66, 69, 0.5); }
-.da-status-dot.offline { background: var(--text-dim); box-shadow: none; }
-
-.da-status-text {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.da-activity {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  min-width: 0;
-}
-
-.da-activity-img-wrap {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1px solid var(--border-cyan);
-  background: var(--cyan-muted);
-}
-.da-activity-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.da-activity-text {
-  min-width: 0;
-  flex: 1;
-}
-.da-activity-name {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.da-activity-detail,
-.da-activity-state {
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.da-empty-msg {
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  font-style: italic;
-}
-
-/* ── Compact footer ── */
-.dash-footer {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  font-size: 0.7rem;
-  padding-top: 0.15rem;
-}
-
-.dash-footer .footer-logo {
-  font-weight: 700;
-  font-size: 0.78rem;
-  background: linear-gradient(90deg, var(--text), var(--cyan));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transition: filter var(--transition);
-  cursor: default;
-}
-.dash-footer .footer-logo:hover {
-  filter: brightness(1.3) drop-shadow(0 0 6px var(--cyan-glow2));
-}
-
-.dash-footer .footer-copy {
-  font-size: 0.66rem;
-  color: var(--text-dim);
-  font-style: italic;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.dash-footer .footer-favicon {
-  width: 13px;
-  height: 13px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 3px rgba(0, 229, 255, 0.4));
-}
-
-/* ============================================
-   MODALS
-   ============================================ */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(1rem, 4vw, 2rem);
-  overflow: hidden;
-
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease, background-color 0.35s ease;
-}
-:root[data-theme="light"] .modal-overlay {
-  background: rgba(20, 24, 30, 0.28);
-}
-.modal-overlay.open {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.modal-box {
-  position: relative;
-  max-height: 92svh;
-  max-width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0.9rem 0.9rem 0 0;
-  opacity: 0;
-  transform: translateY(10px) scale(0.98);
-  transition: opacity 0.3s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  display: flex;
-  flex-direction: column;
-}
-.modal-overlay.open .modal-box {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.modal-box::-webkit-scrollbar { width: 8px; }
-.modal-box::-webkit-scrollbar-track { background: transparent; }
-.modal-box::-webkit-scrollbar-thumb {
-  background: var(--border-cyan);
-  border-radius: 999px;
-}
-
-.modal-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--border-cyan);
-  background: var(--bg-glass);
-  backdrop-filter: blur(10px);
-  color: var(--text);
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-  transition: all var(--transition);
-}
-.modal-close:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
-  box-shadow: 0 0 14px var(--cyan-glow);
-  transform: rotate(90deg);
-}
-
-body.modal-open .music-widget,
-body.modal-open .theme-toggle,
-body.modal-open .easter-egg {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.term-modal-box {
-  width: min(680px, 92vw);
-}
-.term-modal-box .term-window {
-  border-radius: var(--radius-lg);
-  transition: box-shadow 0.4s ease;
-}
-.modal-overlay.open .term-modal-box .term-window {
-  box-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 0 0 1px var(--border-cyan), 0 0 30px var(--cyan-glow2);
-}
-.term-modal-box .term-body {
-  max-height: min(55svh, 460px);
-}
-.term-modal-box .term-hint {
-  margin-top: 0.7rem;
-}
-
-/* terminal dots ease in one after another, once */
-.modal-overlay.open .term-dot {
-  opacity: 0;
-  animation: dotFadeIn 0.3s ease forwards;
-}
-.modal-overlay.open .term-dot:nth-child(1) { animation-delay: 0.05s; }
-.modal-overlay.open .term-dot:nth-child(2) { animation-delay: 0.10s; }
-.modal-overlay.open .term-dot:nth-child(3) { animation-delay: 0.15s; }
-@keyframes dotFadeIn {
-  from { opacity: 0; transform: scale(0.4); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.dc-modal-box {
-  width: min(380px, 92vw);
-}
-.dc-modal-box .dc-card {
-  transition: box-shadow 0.4s ease;
-}
-.modal-overlay.open .dc-modal-box .dc-card {
-  box-shadow: 0 16px 56px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08), 0 0 26px var(--cyan-glow2);
-}
-
-/* avatar settles in with a touch of delay after the card appears */
-.modal-overlay.open .dc-avatar-wrap {
-  opacity: 0;
-  transform: scale(0.85);
-  animation: avatarSettle 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  animation-delay: 0.08s;
-}
-@keyframes avatarSettle {
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* quiet, one-time fade/rise for content — no looping animation */
-.modal-overlay.open .dc-body > * {
-  opacity: 0;
-  animation: contentRise 0.35s ease forwards;
-}
-.modal-overlay.open .dc-body > *:nth-child(1) { animation-delay: 0.04s; }
-.modal-overlay.open .dc-body > *:nth-child(2) { animation-delay: 0.07s; }
-.modal-overlay.open .dc-body > *:nth-child(3) { animation-delay: 0.10s; }
-.modal-overlay.open .dc-body > *:nth-child(4) { animation-delay: 0.13s; }
-.modal-overlay.open .dc-body > *:nth-child(5) { animation-delay: 0.16s; }
-.modal-overlay.open .dc-body > *:nth-child(6) { animation-delay: 0.19s; }
-.modal-overlay.open .dc-body > *:nth-child(7) { animation-delay: 0.22s; }
-.modal-overlay.open .dc-body > *:nth-child(8) { animation-delay: 0.25s; }
-.modal-overlay.open .dc-body > *:nth-child(9) { animation-delay: 0.28s; }
-
-@keyframes contentRise {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.modal-overlay.open .interest-row {
-  opacity: 0;
-  animation: contentRise 0.35s ease forwards;
-}
-.modal-overlay.open .interest-row:nth-child(1) { animation-delay: 0.05s; }
-.modal-overlay.open .interest-row:nth-child(2) { animation-delay: 0.08s; }
-.modal-overlay.open .interest-row:nth-child(3) { animation-delay: 0.11s; }
-.modal-overlay.open .interest-row:nth-child(4) { animation-delay: 0.14s; }
-.modal-overlay.open .interest-row:nth-child(5) { animation-delay: 0.17s; }
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-@media (max-width: 880px), (max-height: 680px) {
-  html, body.dashboard-body {
-    height: auto;
-    overflow-y: auto;
+'use strict';
+
+/* Wrap everything to guarantee the DOM is ready before we touch it,
+   and so each feature is isolated — one failing section won't
+   silently take the rest of the page's interactivity down with it. */
+document.addEventListener('DOMContentLoaded', function () {
+
+/* ── Modal system (Terminal + Discord) ── */
+function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
+  const openBtn  = document.getElementById(openBtnId);
+  const modal    = document.getElementById(modalId);
+  const closeBtn = document.getElementById(closeBtnId);
+  if (!openBtn || !modal || !closeBtn) return;
+
+  let openedOnce = false;
+
+  function open() {
+    modal.classList.add('open');
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+
+    // close music volume panel if it's open, so nothing visually overlaps
+    const musicWidget = document.getElementById('musicWidget');
+    if (musicWidget) musicWidget.classList.remove('open');
+
+    if (!openedOnce && typeof onFirstOpen === 'function') {
+      openedOnce = true;
+      onFirstOpen();
+    }
   }
-  .dashboard {
-    height: auto;
-    min-height: 100svh;
-    justify-content: flex-start;
-    padding-block: 1.5rem;
+
+  function close() {
+    modal.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
   }
-  .tile-grid {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "book"
-      "projects"
-      "about"
-      "terminal"
-      "discord";
-    gap: 0.75rem;
+
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) close();
+  });
+}
+
+try {
+  setupModal('openTerminal', 'terminalModal', 'closeTerminal', () => {
+    if (typeof initPyodideTerminal === 'function') initPyodideTerminal();
+  });
+  setupModal('openDiscord', 'discordModal', 'closeDiscord');
+  setupModal('openAbout', 'aboutModal', 'closeAbout');
+  setupModal('openBook', 'bookModal', 'closeBook');
+} catch (e) { console.error('modal setup failed:', e); }
+
+
+
+/* ── Book of Dragons ── */
+try {
+(function () {
+  const dragons = [
+    { name: 'Night Fury', cls: 'Strike', size: 'Small, lean build', weight: 'Light for its length', behaviour: 'Extremely rare and intelligent; cautious of strangers but fiercely loyal once bonded.' },
+    { name: 'Light Fury', cls: 'Strike', size: 'Small, lean build', weight: 'Light for its length', behaviour: 'Wild and wary of humans; can turn invisible-ish via camouflage scales.' },
+    { name: 'Deadly Nadder', cls: 'Sharp', size: 'Medium', weight: 'Moderate, agile flier', behaviour: 'Vain and proud; loves attention and being praised, fires spines when threatened.' },
+    { name: 'Monstrous Nightmare', cls: 'Stoker', size: 'Large', weight: 'Heavy, powerful build', behaviour: 'Hot-tempered and aggressive at first, but becomes a stubbornly loyal companion once trained.' },
+    { name: 'Hideous Zippleback', cls: 'Mystery', size: 'Large, two-headed', weight: 'Heavy, twin-bodied', behaviour: 'Mischievous and a little dim; the two heads have to work together to attack (gas + spark).' },
+    { name: 'Gronckle', cls: 'Boulder', size: 'Stocky, compact', weight: 'Very heavy for its size', behaviour: 'Lazy and easygoing despite eating rocks; surprisingly strong fliers once moving.' },
+    { name: 'Terrible Terror', cls: 'Stoker', size: 'Tiny', weight: 'Very light', behaviour: 'Feisty and sneaky, hunts and travels in swarms, has a venomous bite for its size.' },
+    { name: 'Red Death', cls: 'Boulder (Queen)', size: 'Colossal, mountain-sized', weight: 'Immense', behaviour: 'A ruthless hive-queen that commands smaller dragons to feed it; territorial and dangerous.' },
+    { name: 'Changewing', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Shy unless protecting its young, can camouflage and spits corrosive acid.' },
+    { name: 'Whispering Death', cls: 'Boulder', size: 'Large, serpentine', weight: 'Heavy', behaviour: 'Relentless burrower with rings of teeth; territorial and dangerous underground.' },
+    { name: 'Skrill', cls: 'Strike (Lightning)', size: 'Medium-large', weight: 'Moderate, built for speed', behaviour: 'Solitary and rare; channels lightning, considered one of the most powerful dragons.' },
+    { name: 'Scauldron', cls: 'Tidal', size: 'Large, eel-like', weight: 'Heavy', behaviour: 'Patient ambush predator that blasts boiling water at prey.' },
+    { name: 'Snaptrapper', cls: 'Mystery', size: 'Large, six-headed', weight: 'Heavy, group body', behaviour: 'Territorial pack hunters that coordinate their many heads to corner prey.' },
+    { name: 'Speed Stinger', cls: 'Tracker', size: 'Small, sleek', weight: 'Light, built for speed', behaviour: 'Hunts in packs with a paralyzing sting; avoids deep water.' },
+    { name: 'Boneknapper', cls: 'Mystery', size: 'Large', weight: 'Heavy', behaviour: 'Elusive and almost mythical; camouflages itself with bones and is patient to the point of holding grudges.' },
+    { name: 'Razorwhip', cls: 'Sharp', size: 'Medium-large', weight: 'Moderate, blade-edged scales', behaviour: 'Proud and graceful in flight; fiercely loyal once a bond is formed.' },
+    { name: 'Stormcutter', cls: 'Tracker', size: 'Large, four-winged', weight: 'Heavy', behaviour: 'Highly intelligent and family-oriented; very protective of its rider and kin.' },
+    { name: 'Typhoomerang', cls: 'Stoker', size: 'Large', weight: 'Heavy', behaviour: 'Ferociously protective parent, attacks in a spinning tornado of fire.' },
+    { name: 'Thunderdrum', cls: 'Tidal', size: 'Large, dolphin-like', weight: 'Heavy', behaviour: 'Cautious around new people but loyal once trusted; stuns enemies with a sonic roar.' },
+    { name: 'Smothering Smokebreath', cls: 'Mystery', size: 'Small', weight: 'Light', behaviour: 'Mischievous and a bit of a thief, hides in thick self-made smokescreens.' },
+    { name: 'Fireworm', cls: 'Stoker', size: 'Tiny, caterpillar-like', weight: 'Very light', behaviour: 'Lives in large colonies and is placid unless its nest is disturbed.' },
+    { name: 'Bewilderbeast', cls: 'Tidal (Alpha)', size: 'Colossal', weight: 'Immense', behaviour: 'A calm, commanding alpha that controls and protects an entire dragon nest using ice breath.' },
+    { name: 'Screaming Death', cls: 'Boulder', size: 'Massive', weight: 'Very heavy', behaviour: 'An obsessive, relentless burrower related to the Whispering Death, known for its piercing screech.' },
+    { name: 'Flightmare', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Eerie and nocturnal, glows and can freeze enemies in place with a paralyzing gaze.' },
+    { name: 'Catastrophic Quaken', cls: 'Boulder', size: 'Large, rock-plated', weight: 'Very heavy', behaviour: 'Territorial and easily startled; causes tremors when it stomps.' },
+    { name: 'Death Song', cls: 'Mystery', size: 'Large', weight: 'Heavy', behaviour: 'Predatory and dangerous when hungry, lures prey with a hypnotic song and traps them in amber.' },
+    { name: 'Snow Wraith', cls: 'Strike', size: 'Medium, eyeless', weight: 'Moderate', behaviour: 'Elusive and fiercely territorial, navigates icy terrain using heat-sensing instead of sight.' },
+    { name: 'Buffalord', cls: 'Tracker', size: 'Bulky', weight: 'Heavy, can inflate further when threatened', behaviour: 'Calm grazer that only turns defensive when provoked.' },
+    { name: 'Eruptodon', cls: 'Boulder', size: 'Large', weight: 'Very heavy', behaviour: 'A gentle giant that eats lava rock and sneezes fireballs when it has a cold.' },
+    { name: 'Armorwing', cls: 'Sharp', size: 'Medium', weight: 'Moderate, metallic scales', behaviour: 'Curious and generally docile, with magnetic abilities tied to its metal-like hide.' },
+    { name: 'Triple Stryke', cls: 'Strike', size: 'Large', weight: 'Heavy', behaviour: 'Aggressive and territorial; wields three tail stingers each with a different venom.' },
+    { name: 'Sand Wraith', cls: 'Tracker', size: 'Medium', weight: 'Moderate', behaviour: 'Elusive and social in small groups, blends into sand and leaves a glowing trail.' },
+    { name: 'Groncicle', cls: 'Boulder', size: 'Stocky', weight: 'Heavy', behaviour: 'A calm, slow-moving cousin of the Gronckle that breathes ice instead of fire.' },
+    { name: 'Singetail', cls: 'Stoker', size: 'Medium, twin-tailed', weight: 'Moderate', behaviour: 'Hot-tempered and protective, capable of setting its own tails alight.' },
+    { name: 'Woolly Howl', cls: 'Tracker', size: 'Large, thick-furred', weight: 'Heavy', behaviour: 'Cautious and family-oriented; flies almost silently thanks to its fur and sound-based stealth.' },
+    { name: 'Shivertooth', cls: 'Boulder', size: 'Large, burrowing', weight: 'Heavy', behaviour: 'Mostly solitary and territorial, tunnels through rock like a mole.' },
+    { name: 'Grapple Grounder', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Cunning and opportunistic, uses a grappling-hook tail to snare prey.' },
+    { name: 'Hobblegrunt', cls: 'Tracker', size: 'Medium, two-headed', weight: 'Moderate', behaviour: 'Docile, herbivorous grazer, generally calm around others.' },
+    { name: 'Mudraker', cls: 'Boulder', size: 'Medium', weight: 'Moderate', behaviour: 'Placid and easily startled, prefers wallowing in mud over confrontation.' },
+    { name: 'Raincutter', cls: 'Tidal', size: 'Large', weight: 'Heavy', behaviour: 'Playful and fast in water, propelled by powerful jets of water.' },
+    { name: 'Timberjack', cls: 'Sharp', size: 'Very large, wide-winged', weight: 'Heavy but graceful flier', behaviour: 'Aloof and territorial, can launch razor-edged wingblasts to fell trees and enemies alike.' },
+    { name: 'Rumblehorn', cls: 'Boulder', size: 'Large, armored', weight: 'Very heavy', behaviour: 'Calm and dependable, with thick plating and a powerful tusked headbutt.' },
+    { name: 'Hobgobbler', cls: 'Tidal', size: 'Small, stocky', weight: 'Light', behaviour: 'Skittish scavenger that lives in burrows near water and steals food when it can.' },
+    { name: 'Crimson Goregutter', cls: 'Sharp', size: 'Large, deer-like', weight: 'Moderate', behaviour: 'Mostly peaceful grazer with large antler-like horns, but will fight fiercely if cornered.' },
+    { name: 'Submaripper', cls: 'Tidal', size: 'Large, eel-like', weight: 'Heavy', behaviour: 'A deep-sea ambush hunter rarely seen at the surface; aggressive toward anything that strays into its waters.' },
+    { name: 'Slithersong', cls: 'Mystery', size: 'Medium, serpentine', weight: 'Light', behaviour: 'Uses a hypnotic singing call to lure and confuse prey before striking.' },
+    { name: 'Moldruffle', cls: 'Boulder', size: 'Large, mossy hide', weight: 'Heavy', behaviour: 'Slow, gentle, and easily startled; camouflages well in forests and caves.' },
+    { name: 'Sentinel', cls: 'Tidal', size: 'Large', weight: 'Heavy', behaviour: 'Guardian-like and protective of its territory, patient until provoked.' },
+    { name: 'Silver Phantom', cls: 'Strike', size: 'Medium-large', weight: 'Moderate', behaviour: 'Elusive and almost ghostlike in flight; rarely seen and highly intelligent.' },
+    { name: 'Shockjaw', cls: 'Tidal', size: 'Large, sleek', weight: 'Heavy', behaviour: 'Obsessive treasure-hoarder that stuns prey with an electric bite.' },
+    { name: 'Devilish Dervish', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Erratic, spinning flight pattern makes it hard to predict or pin down.' },
+    { name: 'Prickleboggle', cls: 'Tracker', size: 'Small', weight: 'Light', behaviour: 'Shy and quick to flee, using sharp quills as its main defense.' },
+    { name: 'Tide Glider', cls: 'Tidal', size: 'Medium, ray-like', weight: 'Light', behaviour: 'Calm and social, glides gracefully along the ocean surface in small groups.' },
+    { name: 'Hackatoo', cls: 'Sharp', size: 'Medium', weight: 'Moderate', behaviour: 'Restless and easily agitated, with sharp, axe-like head plating.' },
+    { name: 'Hotburple', cls: 'Boulder', size: 'Round, stout', weight: 'Heavy', behaviour: 'Sleepy and slow-moving, mostly harmless unless woken suddenly.' },
+    { name: 'Dramillion', cls: 'Tracker', size: 'Medium, monkey-like', weight: 'Light, agile', behaviour: 'Playful and mischievous, with unusually nimble limbs for climbing and grabbing.' },
+    { name: 'Ripwrecker', cls: 'Tidal', size: 'Large, armored shell', weight: 'Very heavy', behaviour: 'Slow but unstoppable, plows through obstacles and ship hulls alike.' },
+    { name: 'Foreverwing', cls: 'Tracker', size: 'Massive, ancient', weight: 'Immense', behaviour: 'An ancient, long-lived species said to grow larger the longer it lives; generally reclusive.' },
+    { name: 'Grim Gnasher', cls: 'Stoker', size: 'Small', weight: 'Light', behaviour: 'Quick-tempered and snappy despite its small size, fiercely defends its space.' },
+    { name: 'Sliquifier', cls: 'Tidal', size: 'Medium', weight: 'Moderate', behaviour: 'Coats prey and surfaces in a slick secretion to immobilize or escape danger.' },
+    { name: 'Sweet Death', cls: 'Mystery', size: 'Large', weight: 'Heavy', behaviour: 'Lures victims in with an irresistibly sweet scent before trapping them in sticky resin.' },
+    { name: 'Windwalker', cls: 'Tracker', size: 'Large, majestic', weight: 'Heavy', behaviour: 'Wise and ancient, said to be able to sense danger on the wind long before it arrives.' },
+    { name: 'Crimson Slasher', cls: 'Sharp', size: 'Medium', weight: 'Moderate', behaviour: 'Quick and aggressive, with blade-like claws built for slashing through dense brush.' },
+    { name: 'Snifflehunch', cls: 'Tracker', size: 'Small-medium', weight: 'Light', behaviour: 'Has an extraordinary sense of smell, used to track prey and other dragons over long distances.' },
+    { name: 'Deathgripper', cls: 'Boulder', size: 'Large, scorpion-like', weight: 'Heavy', behaviour: 'Highly aggressive and territorial, with a venomous stinger and crushing claws; very difficult to tame.' },
+    { name: 'Grapple Snapper', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Ambushes prey using strong jaws and a low, ground-hugging hunting style.' },
+  ];
+
+  const listEl   = document.getElementById('bookList');
+  const searchEl = document.getElementById('bookSearch');
+  const countEl  = document.getElementById('bookCount');
+  if (!listEl || !searchEl) return;
+
+  function render(filter) {
+    const q = (filter || '').trim().toLowerCase();
+    const filtered = dragons.filter(d =>
+      d.name.toLowerCase().includes(q) || d.cls.toLowerCase().includes(q)
+    );
+
+    if (countEl) countEl.textContent = `${filtered.length} / ${dragons.length}`;
+
+    if (!filtered.length) {
+      listEl.innerHTML = '<p class="book-list-empty">no dragons match that search</p>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(d => `
+      <div class="dragon-card">
+        <div class="dragon-card-head">
+          <span class="dragon-card-name">${d.name}</span>
+          <span class="dragon-card-class">${d.cls}</span>
+        </div>
+        <div class="dragon-card-stats">
+          <span><b>Size:</b> ${d.size}</span>
+          <span><b>Weight:</b> ${d.weight}</span>
+        </div>
+        <p class="dragon-card-behaviour">${d.behaviour}</p>
+      </div>
+    `).join('');
   }
-  .tile {
-    min-height: 160px;
+
+  render('');
+  searchEl.addEventListener('input', () => render(searchEl.value));
+})();
+} catch (e) { console.error('book of dragons setup failed:', e); }
+
+
+
+/* ── Python terminal (Pyodide REPL) ── */
+let initPyodideTerminal = function () {};
+
+try {
+(function () {
+  const statusEl = document.getElementById('termStatus');
+  const outputEl = document.getElementById('termOutput');
+  const inputEl  = document.getElementById('termInput');
+  const bodyEl   = document.getElementById('termBody');
+  if (!inputEl) return;
+
+  let pyodide   = null;
+  let history   = [];
+  let histIndex = -1;
+
+  function appendLine(text, cls) {
+    const span = document.createElement('div');
+    span.className = cls || '';
+    span.textContent = text;
+    outputEl.appendChild(span);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
   }
-  .tile-projects .projects-grid {
-    grid-template-columns: 1fr 1fr;
+
+  function printWelcome() {
+    appendLine('Python 3.11 (Pyodide) — running entirely in your browser', 'term-line-sys');
+    appendLine('Type python code below and hit enter. No server involved.', 'term-line-sys');
+    appendLine('', '');
   }
-}
 
-@media (max-width: 460px) {
-  .tile-projects .projects-grid {
-    grid-template-columns: 1fr;
+  async function initPyodide() {
+    statusEl.textContent = 'loading…';
+
+    if (typeof loadPyodide !== 'function') {
+      statusEl.textContent = 'failed to load';
+      statusEl.style.color = '#ff6b6b';
+      appendLine('Pyodide script did not load (likely blocked by network/adblock/CSP). Try disabling any ad blocker or content blocker for this site and refresh.', 'term-line-err');
+      return;
+    }
+
+    try {
+      const loadPromise = loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'
+      });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timed out after 25s — slow or blocked connection')), 25000)
+      );
+
+      pyodide = await Promise.race([loadPromise, timeoutPromise]);
+
+      // redirect stdout/stderr into our terminal
+      pyodide.setStdout({ batched: (s) => appendLine(s, 'term-line-out') });
+      pyodide.setStderr({ batched: (s) => appendLine(s, 'term-line-err') });
+
+      statusEl.textContent = 'ready';
+      statusEl.classList.add('ready');
+      inputEl.disabled = false;
+      inputEl.placeholder = 'type python here…';
+      inputEl.focus();
+
+      // help() tries to open an interactive pager that reads stdin, which
+      // doesn't exist in this environment and throws an I/O error. Patch it
+      // to just print the help text instead, like a non-interactive call.
+      try {
+        await pyodide.runPythonAsync(`
+import pydoc, builtins
+
+def _browser_help(*args):
+    if not args:
+        print("Type help(object) for help on a specific module, function, class, etc.")
+        return
+    text = pydoc.render_doc(args[0], renderer=pydoc.plaintext)
+    print(text)
+
+builtins.help = _browser_help
+        `);
+      } catch (patchErr) {
+        // non-fatal — if this fails, help() will still mostly work for simple cases
+      }
+
+      printWelcome();
+    } catch (err) {
+      statusEl.textContent = 'failed to load';
+      statusEl.style.color = '#ff6b6b';
+      appendLine('Could not load the Python runtime: ' + (err && err.message ? err.message : err), 'term-line-err');
+      appendLine('Check your internet connection, disable any ad/script blockers for this site, and refresh.', 'term-line-sys');
+    }
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  async function runCode(code) {
+    appendLine(code, 'term-line-in');
+
+    if (code.trim() === 'clear') {
+      outputEl.innerHTML = '';
+      return;
+    }
+
+    try {
+      let result = await pyodide.runPythonAsync(code);
+      if (result !== undefined && result !== null) {
+        appendLine(String(result), 'term-line-out');
+      }
+    } catch (err) {
+      // Pyodide errors are verbose Python tracebacks — show the last meaningful line
+      const msg = String(err);
+      const lines = msg.trim().split('\n');
+      appendLine(lines[lines.length - 1] || msg, 'term-line-err');
+    }
   }
-}
 
-/* ============================================
-   ABOUT MODAL
-   ============================================ */
-.about-modal-box {
-  width: min(480px, 92vw);
-}
+  inputEl.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+      const code = inputEl.value;
+      if (!code.trim() || !pyodide) return;
 
-.about-modal-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-cyan);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem 1.6rem;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 0 24px var(--cyan-glow2);
-}
+      history.push(code);
+      histIndex = history.length;
+      inputEl.value = '';
+      inputEl.disabled = true;
 
-.about-modal-label {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--cyan);
-  letter-spacing: 0.08em;
-  margin-bottom: 0.5rem;
-  opacity: 0.85;
-}
+      await runCode(code);
 
-.about-modal-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  margin-bottom: 1.25rem;
-  position: relative;
-  padding-bottom: 0.9rem;
-}
-.about-modal-title::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 38px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--cyan), transparent);
-}
+      inputEl.disabled = false;
+      inputEl.focus();
+    } else if (e.key === 'ArrowUp') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIndex = Math.max(0, histIndex - 1);
+      inputEl.value = history[histIndex] || '';
+    } else if (e.key === 'ArrowDown') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIndex = Math.min(history.length, histIndex + 1);
+      inputEl.value = history[histIndex] || '';
+    }
+  });
 
-.interests-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  counter-reset: interest-index;
-}
+  // Clicking anywhere in the terminal body focuses the input
+  bodyEl.addEventListener('click', () => {
+    if (!inputEl.disabled) inputEl.focus();
+  });
 
-.interest-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  counter-increment: interest-index;
-  position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-left: 2px solid transparent;
-  border-radius: var(--radius);
-  padding: 0.85rem 1rem;
-  transition: all var(--transition);
-}
-.interest-row:hover {
-  border-color: var(--border-cyan);
-  border-left-color: var(--cyan);
-  background: var(--bg-card-hov);
-  transform: translateX(3px);
-  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
-}
+  // Only load Pyodide the first time the terminal modal is opened
+  initPyodideTerminal = function () {
+    if (!pyodide) initPyodide();
+  };
+})();
+} catch (e) { console.error('terminal setup failed:', e); }
 
-.interest-row .interest-icon {
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  line-height: 1.2;
-  margin-top: 1px;
-  transition: transform var(--transition);
-}
-.interest-row:hover .interest-icon {
-  transform: scale(1.18) rotate(-4deg);
-}
+/* ── Per-tile spotlight + subtle 3D tilt ── */
+try {
+(function () {
+  const tiles = document.querySelectorAll('.tile');
+  const MAX_TILT = 4; // degrees, kept subtle
 
-.interest-row .interest-body {
-  min-width: 0;
-}
+  tiles.forEach((tile) => {
+    let rect = null;
+    let pending = null;
 
-.interest-row .interest-body h3 {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.2rem;
-}
+    tile.addEventListener('mouseenter', () => {
+      rect = tile.getBoundingClientRect();
+      tile.classList.remove('tile-resetting');
+    });
 
-.interest-row .interest-body p {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
+    tile.addEventListener('mousemove', (e) => {
+      if (!rect) rect = tile.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-.interest-row::after {
-  content: counter(interest-index, decimal-leading-zero);
-  position: absolute;
-  top: 0.6rem;
-  right: 0.8rem;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  letter-spacing: 0.05em;
-  transition: color var(--transition);
-}
-.interest-row:hover::after {
-  color: var(--cyan);
-}
+      if (pending) return;
+      pending = requestAnimationFrame(() => {
+        pending = null;
+        tile.style.setProperty('--mx', x + 'px');
+        tile.style.setProperty('--my', y + 'px');
 
-/* ============================================
-   BOOK OF DRAGONS MODAL
-   ============================================ */
-.book-modal-box {
-  width: min(560px, 92vw);
-}
+        const px = (x / rect.width) - 0.5;
+        const py = (y / rect.height) - 0.5;
+        const rotateY = (px * MAX_TILT * 2).toFixed(2);
+        const rotateX = (py * -MAX_TILT * 2).toFixed(2);
+        tile.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px)`;
+      });
+    });
 
-.book-modal-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-cyan);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem 1.6rem;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 0 24px var(--cyan-glow2);
-  display: flex;
-  flex-direction: column;
-  max-height: min(640px, 80vh);
-}
+    tile.addEventListener('mouseleave', () => {
+      rect = null;
+      tile.classList.add('tile-resetting');
+      tile.style.transform = '';
+    });
+  });
+})();
+} catch (e) { console.error('tile tilt setup failed:', e); }
 
-.book-modal-label {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--cyan);
-  letter-spacing: 0.08em;
-  margin-bottom: 0.5rem;
-  opacity: 0.85;
-}
+/* ── Theme toggle (dark / light) ── */
+try {
+(function () {
+  const root   = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
 
-.book-modal-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  margin-bottom: 0.35rem;
-}
+  toggle.addEventListener('click', () => {
+    const isLight = root.getAttribute('data-theme') === 'light';
+    if (isLight) {
+      root.removeAttribute('data-theme');
+      localStorage.setItem('jdkcube-theme', 'dark');
+    } else {
+      root.setAttribute('data-theme', 'light');
+      localStorage.setItem('jdkcube-theme', 'light');
+    }
+  });
+})();
+} catch (e) { console.error('theme toggle setup failed:', e); }
 
-.book-modal-sub {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-  margin-bottom: 1.1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
-}
+/* ── Music player ── */
+try {
+(function () {
+  const audio   = document.getElementById('bgMusic');
+  const widget  = document.getElementById('musicWidget');
+  const btn     = document.getElementById('musicBtn');
+  const panel   = document.getElementById('musicPanel');
+  const slider  = document.getElementById('volumeSlider');
+  const pauseBtn = document.getElementById('musicPauseBtn');
 
-.book-search-row {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.6rem 0.85rem;
-  margin-bottom: 1rem;
-  transition: border-color var(--transition);
-}
-.book-search-row:focus-within {
-  border-color: var(--border-cyan);
-  box-shadow: 0 0 0 1px var(--border-cyan);
-}
+  let playing = false;
+  let open    = false;
 
-.book-search-icon {
-  flex-shrink: 0;
-  font-size: 0.85rem;
-  opacity: 0.7;
-}
+  // Set initial volume
+  audio.volume = slider.value / 100;
+  updateSliderFill();
 
-.book-search-input {
-  flex: 1;
-  min-width: 0;
-  background: none;
-  border: none;
-  outline: none;
-  font-family: var(--font-main);
-  font-size: 0.85rem;
-  color: var(--text);
-}
-.book-search-input::placeholder {
-  color: var(--text-dim);
-}
+  // Toggle panel open/close on button click
+  btn.addEventListener('click', () => {
+    if (!open) {
+      open = true;
+      widget.classList.add('open');
 
-.book-search-count {
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  letter-spacing: 0.03em;
-}
+      // Start music on first interaction (browser autoplay policy)
+      if (!playing) {
+        audio.play().then(() => {
+          playing = true;
+          btn.classList.add('playing');
+          if (pauseBtn) pauseBtn.classList.remove('paused');
+        }).catch(() => {});
+      }
+    } else {
+      open = false;
+      widget.classList.remove('open');
+    }
+  });
 
-.book-list {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding-right: 0.3rem;
-}
+  // Close panel when clicking outside
+  document.addEventListener('click', e => {
+    if (!widget.contains(e.target) && open) {
+      open = false;
+      widget.classList.remove('open');
+    }
+  });
 
-.dragon-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-left: 2px solid transparent;
-  border-radius: var(--radius);
-  padding: 0.8rem 1rem;
-  transition: all var(--transition);
-}
-.dragon-card:hover {
-  border-color: var(--border-cyan);
-  border-left-color: var(--cyan);
-  background: var(--bg-card-hov);
-}
+  // Play / pause button inside the panel
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (playing) {
+        audio.pause();
+        playing = false;
+        btn.classList.remove('playing');
+        pauseBtn.classList.add('paused');
+        pauseBtn.setAttribute('aria-label', 'Play music');
+      } else {
+        audio.play().then(() => {
+          playing = true;
+          btn.classList.add('playing');
+          pauseBtn.classList.remove('paused');
+          pauseBtn.setAttribute('aria-label', 'Pause music');
+        }).catch(() => {});
+      }
+    });
+  }
 
-.dragon-card-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.6rem;
-  margin-bottom: 0.45rem;
-}
+  // Volume slider
+  slider.addEventListener('input', () => {
+    audio.volume = slider.value / 100;
+    updateSliderFill();
+  });
 
-.dragon-card-name {
-  font-size: 0.94rem;
-  font-weight: 600;
-  color: var(--text);
-}
+  function updateSliderFill() {
+    slider.style.setProperty('--val', slider.value + '%');
+  }
+})();
+} catch (e) { console.error('music player setup failed:', e); }
 
-.dragon-card-class {
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--cyan);
-  background: var(--cyan-muted);
-  border: 1px solid var(--border-cyan);
-  border-radius: 999px;
-  padding: 0.15rem 0.55rem;
-}
+/* ── Easter egg (corner pfp) ──
+   This link previously relied only on CSS :hover/:focus-visible to reveal
+   the "click me" bubble and animate the avatar. Touch devices have no real
+   hover state, so the first tap just triggered the hover styles instead of
+   following the link — visitors had to tap twice. We add a small JS-driven
+   "touched" state so a single tap reveals the bubble immediately and the
+   link still navigates normally right after. */
+try {
+(function () {
+  const egg = document.getElementById('easterEgg');
+  if (!egg) return;
 
-.dragon-card-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-bottom: 0.4rem;
-}
-.dragon-card-stats span b {
-  color: var(--text-dim);
-  font-weight: 500;
-}
+  egg.addEventListener('touchstart', () => {
+    egg.classList.add('touched');
+  }, { passive: true });
+})();
+} catch (e) { console.error('easter egg setup failed:', e); }
 
-.dragon-card-behaviour {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
+try {
+const copyBtn = document.getElementById('copyBtn');
+if (copyBtn) {
+  let resetTimer = null;
 
-.book-list-empty {
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  padding: 2rem 0;
-}
-/* ============================================
-   EASTER EGG (corner pfp)
-   ============================================ */
-.easter-egg {
-  position: fixed;
-  bottom: 1.1rem;
-  left: 1.1rem;
-  z-index: 998;
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-}
+  copyBtn.addEventListener('click', async () => {
+    const username = 'judokacube';
 
-.easter-egg-img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  border: 2px solid var(--bg-glass);
-  box-shadow: 0 4px 18px rgba(0,0,0,0.45), 0 0 0 1px var(--border-cyan);
-  transform: rotate(-10deg);
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
-  opacity: 0;
-  animation: eggSettle 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  animation-delay: 0.6s;
-}
+    try {
+      await navigator.clipboard.writeText(username);
+    } catch {
+      /* fallback for older browsers */
+      const ta = document.createElement('textarea');
+      ta.value = username;
+      ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
 
-@keyframes eggSettle {
-  from { opacity: 0; transform: rotate(-26deg) scale(0.6); }
-  to   { opacity: 1; transform: rotate(-10deg) scale(1); }
-}
+    copyBtn.classList.add('copied');
+    copyBtn.setAttribute('aria-label', 'Username copied!');
 
-.easter-egg:hover .easter-egg-img,
-.easter-egg:focus-visible .easter-egg-img,
-.easter-egg.touched .easter-egg-img {
-  transform: rotate(0deg) scale(1.08);
-  box-shadow: 0 6px 22px rgba(0,0,0,0.5), 0 0 18px var(--cyan-glow);
+    if (resetTimer) clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      copyBtn.classList.remove('copied');
+      copyBtn.setAttribute('aria-label', 'Copy username to clipboard');
+    }, 2000);
+  });
 }
+} catch (e) { console.error('copy button setup failed:', e); }
 
-.easter-egg-bubble {
-  position: absolute;
-  bottom: 58px;
-  left: 0;
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-cyan);
-  color: var(--text);
-  font-family: var(--font-main);
-  font-size: 0.82rem;
-  font-weight: 500;
-  white-space: nowrap;
-  padding: 0.45rem 0.8rem;
-  border-radius: var(--radius);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-  opacity: 0;
-  transform: translateY(6px) scale(0.92);
-  transform-origin: bottom left;
-  pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-}
+/* ── Live Discord activity (Lanyard) ── */
+try {
+(function () {
+  const DISCORD_USER_ID = '820292272209002526';
+  const POLL_MS = 20000;
 
-.easter-egg-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 16px;
-  width: 10px;
-  height: 10px;
-  background: var(--bg-glass);
-  border-right: 1px solid var(--border-cyan);
-  border-bottom: 1px solid var(--border-cyan);
-  transform: rotate(45deg);
-}
+  const dot         = document.getElementById('daStatusDot');
+  const statusText  = document.getElementById('daStatusText');
+  const activityBox = document.getElementById('daActivity');
+  const activityImg = document.getElementById('daActivityImg');
+  const activityName = document.getElementById('daActivityName');
+  const activityDetail = document.getElementById('daActivityDetail');
+  const activityState = document.getElementById('daActivityState');
+  const emptyMsg = document.getElementById('daEmptyMsg');
+  if (!dot || !statusText) return;
 
-.easter-egg:hover .easter-egg-bubble,
-.easter-egg:focus-visible .easter-egg-bubble,
-.easter-egg.touched .easter-egg-bubble {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
+  const STATUS_LABELS = {
+    online: 'Online',
+    idle: 'Idle',
+    dnd: 'Do Not Disturb',
+    offline: 'Offline'
+  };
 
-@media (max-width: 460px) {
-  .easter-egg { display: none; }
-}
+  // Builds a usable image URL from a Discord rich-presence asset string.
+  // Spotify assets are handled separately since Lanyard gives a direct URL.
+  function resolveAssetUrl(applicationId, assetKey) {
+    if (!assetKey) return null;
+    if (assetKey.startsWith('mp:')) {
+      return 'https://media.discordapp.net/' + assetKey.replace(/^mp:/, '');
+    }
+    return `https://cdn.discordapp.com/app-assets/${applicationId}/${assetKey}.png`;
+  }
+
+  const imgWrapEl = activityImg.parentElement;
+  activityImg.addEventListener('error', () => {
+    activityImg.removeAttribute('src');
+    imgWrapEl.hidden = true;
+  });
+
+  function showActivity({ imgUrl, name, detail, state }) {
+    if (imgUrl) {
+      activityImg.src = imgUrl;
+      activityImg.alt = name || '';
+      imgWrapEl.hidden = false;
+    } else {
+      // No usable image for this activity — clear the src so a stale or
+      // broken icon never lingers, and hide the box entirely.
+      activityImg.removeAttribute('src');
+      activityImg.alt = '';
+      imgWrapEl.hidden = true;
+    }
+    activityName.textContent = name || '';
+    activityDetail.textContent = detail || '';
+    activityDetail.hidden = !detail;
+    activityState.textContent = state || '';
+    activityState.hidden = !state;
+    activityBox.hidden = false;
+    emptyMsg.hidden = true;
+  }
+
+  function showEmpty() {
+    activityBox.hidden = true;
+    emptyMsg.hidden = false;
+  }
+
+  function render(data) {
+    const status = data.discord_status || 'offline';
+    dot.className = 'da-status-dot ' + status;
+    statusText.textContent = STATUS_LABELS[status] || 'Offline';
+
+    // Prefer Spotify (has reliable album art), then the first non-custom-status activity.
+    if (data.listening_to_spotify && data.spotify) {
+      showActivity({
+        imgUrl: data.spotify.album_art_url,
+        name: data.spotify.song,
+        detail: 'by ' + data.spotify.artist,
+        state: data.spotify.album ? 'on ' + data.spotify.album : ''
+      });
+      return;
+    }
+
+    const activity = (data.activities || []).find(a => a.type !== 4); // skip custom status (type 4)
+    if (activity) {
+      const assets = activity.assets || {};
+      const imgUrl = resolveAssetUrl(activity.application_id, assets.large_image);
+      showActivity({
+        imgUrl,
+        name: activity.name,
+        detail: activity.details || '',
+        state: activity.state || ''
+      });
+      return;
+    }
+
+    // Fall back to a custom status if that's all there is.
+    const customStatus = (data.activities || []).find(a => a.type === 4);
+    if (customStatus && (customStatus.state || customStatus.emoji)) {
+      showActivity({
+        imgUrl: null,
+        name: [customStatus.emoji ? customStatus.emoji.name : '', customStatus.state].filter(Boolean).join(' ').trim(),
+        detail: '',
+        state: ''
+      });
+      return;
+    }
+
+    showEmpty();
+  }
+
+  async function fetchActivity() {
+    try {
+      const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+      const json = await res.json();
+      if (json && json.success && json.data) render(json.data);
+    } catch (err) {
+      statusText.textContent = 'unavailable';
+      dot.className = 'da-status-dot offline';
+    }
+  }
+
+  fetchActivity();
+  setInterval(fetchActivity, POLL_MS);
+})();
+} catch (e) { console.error('discord activity widget setup failed:', e); }
+
+}); // end DOMContentLoaded
