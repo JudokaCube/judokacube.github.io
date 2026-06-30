@@ -952,7 +952,9 @@ html, body.dashboard-body {
 }
 
 .tile-projects { grid-area: projects; min-height: 0; }
-.tile-book-launch { grid-area: book; }
+.tile-col-book { grid-area: book; display: flex; flex-direction: column; gap: clamp(1rem, 2vh, 1.5rem); min-height: 0; }
+.tile-book-launch { flex: 1; min-height: 0; }
+.tile-mc-launch   { flex: 1; min-height: 0; }
 .tile-col-about { grid-area: about; display: flex; flex-direction: column; gap: clamp(1rem, 2vh, 1.5rem); min-height: 0; }
 .tile-about-launch    { flex: 1.5; min-height: 0; }
 .tile-discord-activity { flex: 1; min-height: 0; }
@@ -1521,12 +1523,18 @@ body.modal-open .easter-egg {
     grid-template-columns: 1fr;
     grid-template-areas:
       "book"
+      "mc"
       "projects"
       "about"
       "terminal"
       "discord";
     gap: 0.75rem;
   }
+  .tile-col-book {
+    display: contents;
+  }
+  .tile-book-launch { grid-area: book; }
+  .tile-mc-launch   { grid-area: mc; }
   .tile {
     min-height: 160px;
   }
@@ -1663,6 +1671,85 @@ body.modal-open .easter-egg {
 }
 .interest-row:hover::after {
   color: var(--cyan);
+}
+
+/* ============================================
+   MINECRAFT SKIN MODAL
+   ============================================ */
+.mc-modal-box {
+  width: min(380px, 92vw);
+}
+
+.mc-skin-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-cyan);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.6rem;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 0 24px var(--cyan-glow2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mc-skin-label {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}
+
+.mc-skin-title {
+  align-self: flex-start;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 1.1rem;
+}
+
+.mc-skin-canvas-wrap {
+  position: relative;
+  width: min(280px, 80vw);
+  height: min(280px, 80vw);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.mc-skin-canvas-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  cursor: grab;
+}
+.mc-skin-canvas-wrap canvas:active {
+  cursor: grabbing;
+}
+
+.mc-skin-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.mc-skin-hint {
+  margin-top: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
 }
 
 /* ============================================
