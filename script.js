@@ -402,4 +402,129 @@ if (copyBtn) {
 }
 } catch (e) { console.error('copy button setup failed:', e); }
 
+/* ── Live Discord activity (Lanyard) ── */
+try {
+(function () {
+  const DISCORD_USER_ID = '820292272209002526';
+  const POLL_MS = 20000;
+
+  const dot         = document.getElementById('daStatusDot');
+  const statusText  = document.getElementById('daStatusText');
+  const activityBox = document.getElementById('daActivity');
+  const activityImg = document.getElementById('daActivityImg');
+  const activityName = document.getElementById('daActivityName');
+  const activityDetail = document.getElementById('daActivityDetail');
+  const activityState = document.getElementById('daActivityState');
+  const emptyMsg = document.getElementById('daEmptyMsg');
+  if (!dot || !statusText) return;
+
+  const STATUS_LABELS = {
+    online: 'Online',
+    idle: 'Idle',
+    dnd: 'Do Not Disturb',
+    offline: 'Offline'
+  };
+
+  // Builds a usable image URL from a Discord rich-presence asset string.
+  // Spotify assets are handled separately since Lanyard gives a direct URL.
+  function resolveAssetUrl(applicationId, assetKey) {
+    if (!assetKey) return null;
+    if (assetKey.startsWith('mp:')) {
+      return 'https://media.discordapp.net/' + assetKey.replace(/^mp:/, '');
+    }
+    return `https://cdn.discordapp.com/app-assets/${applicationId}/${assetKey}.png`;
+  }
+
+  const imgWrapEl = activityImg.parentElement;
+  activityImg.addEventListener('error', () => {
+    activityImg.removeAttribute('src');
+    imgWrapEl.hidden = true;
+  });
+
+  function showActivity({ imgUrl, name, detail, state }) {
+    if (imgUrl) {
+      activityImg.src = imgUrl;
+      activityImg.alt = name || '';
+      imgWrapEl.hidden = false;
+    } else {
+      // No usable image for this activity — clear the src so a stale or
+      // broken icon never lingers, and hide the box entirely.
+      activityImg.removeAttribute('src');
+      activityImg.alt = '';
+      imgWrapEl.hidden = true;
+    }
+    activityName.textContent = name || '';
+    activityDetail.textContent = detail || '';
+    activityDetail.hidden = !detail;
+    activityState.textContent = state || '';
+    activityState.hidden = !state;
+    activityBox.hidden = false;
+    emptyMsg.hidden = true;
+  }
+
+  function showEmpty() {
+    activityBox.hidden = true;
+    emptyMsg.hidden = false;
+  }
+
+  function render(data) {
+    const status = data.discord_status || 'offline';
+    dot.className = 'da-status-dot ' + status;
+    statusText.textContent = STATUS_LABELS[status] || 'Offline';
+
+    // Prefer Spotify (has reliable album art), then the first non-custom-status activity.
+    if (data.listening_to_spotify && data.spotify) {
+      showActivity({
+        imgUrl: data.spotify.album_art_url,
+        name: data.spotify.song,
+        detail: 'by ' + data.spotify.artist,
+        state: data.spotify.album ? 'on ' + data.spotify.album : ''
+      });
+      return;
+    }
+
+    const activity = (data.activities || []).find(a => a.type !== 4); // skip custom status (type 4)
+    if (activity) {
+      const assets = activity.assets || {};
+      const imgUrl = resolveAssetUrl(activity.application_id, assets.large_image);
+      showActivity({
+        imgUrl,
+        name: activity.name,
+        detail: activity.details || '',
+        state: activity.state || ''
+      });
+      return;
+    }
+
+    // Fall back to a custom status if that's all there is.
+    const customStatus = (data.activities || []).find(a => a.type === 4);
+    if (customStatus && (customStatus.state || customStatus.emoji)) {
+      showActivity({
+        imgUrl: null,
+        name: [customStatus.emoji ? customStatus.emoji.name : '', customStatus.state].filter(Boolean).join(' ').trim(),
+        detail: '',
+        state: ''
+      });
+      return;
+    }
+
+    showEmpty();
+  }
+
+  async function fetchActivity() {
+    try {
+      const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+      const json = await res.json();
+      if (json && json.success && json.data) render(json.data);
+    } catch (err) {
+      statusText.textContent = 'unavailable';
+      dot.className = 'da-status-dot offline';
+    }
+  }
+
+  fetchActivity();
+  setInterval(fetchActivity, POLL_MS);
+})();
+} catch (e) { console.error('discord activity widget setup failed:', e); }
+
 }); // end DOMContentLoaded
