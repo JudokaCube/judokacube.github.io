@@ -33,6 +33,7 @@
       <div class="hero-btns">
         <a href="#about"    class="btn btn-ghost" data-scroll>about me</a>
         <a href="#projects" class="btn btn-ghost" data-scroll>projects</a>
+        <a href="#terminal" class="btn btn-ghost" data-scroll>terminal</a>
         <a href="#discord"  class="btn btn-primary" data-scroll>discord</a>
       </div>
     </div>
@@ -142,6 +143,51 @@
           <a href="https://anakreativa.com" target="_blank" rel="noopener" class="project-link">visit ↗</a>
         </div>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ TERMINAL ░░ -->
+  <section id="terminal" class="section terminal-section">
+    <div class="container">
+      <div class="section-label">// terminal</div>
+      <h2 class="section-title">live python terminal</h2>
+      <p class="about-intro">
+        a real python interpreter running right in your browser. no backend, no server — just python compiled to webassembly. go ahead, break something.
+      </p>
+
+      <div class="term-wrapper">
+        <div class="term-window">
+
+          <div class="term-titlebar">
+            <div class="term-dots">
+              <span class="term-dot red"></span>
+              <span class="term-dot yellow"></span>
+              <span class="term-dot green"></span>
+            </div>
+            <span class="term-title">python3 — jdkcube</span>
+            <span class="term-status" id="termStatus">loading…</span>
+          </div>
+
+          <div class="term-body" id="termBody">
+            <pre class="term-output" id="termOutput"></pre>
+            <div class="term-input-row">
+              <span class="term-prompt">&gt;&gt;&gt;</span>
+              <input
+                type="text"
+                class="term-input"
+                id="termInput"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="loading python runtime…"
+                disabled
+              />
+            </div>
+          </div>
+
+        </div>
+        <p class="term-hint">↑ / ↓ for history · type <code>clear</code> to reset · <code>help()</code> works too</p>
       </div>
     </div>
   </section>
@@ -258,6 +304,7 @@
     <span class="theme-icon theme-icon-sun">☀️</span>
   </button>
 
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
