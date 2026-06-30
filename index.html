@@ -19,6 +19,53 @@
 </head>
 <body class="dashboard-body">
 
+  <!-- ░░ BOOT SEQUENCE ░░ -->
+  <div class="boot-screen" id="bootScreen" aria-hidden="true">
+    <div class="boot-grid"></div>
+    <div class="boot-glow"></div>
+
+    <div class="boot-stack">
+      <div class="boot-emblem">
+        <span class="boot-ring boot-ring-a"></span>
+        <span class="boot-ring boot-ring-b"></span>
+        <svg class="boot-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path class="boot-logo-path boot-logo-path-1" d="M50 16 L82 34 L82 70 L50 88 L18 70 L18 34 Z" stroke-linejoin="round" stroke-linecap="round"/>
+          <path class="boot-logo-path boot-logo-path-2" d="M50 52 L50 16 M50 52 L18 70 M50 52 L82 70" stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="boot-wordmark">
+        <span class="boot-wordmark-main">JDKCUBE</span>
+        <span class="boot-wordmark-sub">jdkcube@arch</span>
+      </div>
+
+      <div class="boot-progress-track">
+        <div class="boot-progress-fill"></div>
+      </div>
+
+      <div class="boot-stage-wrap">
+        <span class="boot-stage" style="--i:0">spinning up the kernel</span>
+        <span class="boot-stage" style="--i:1">mounting filesystems</span>
+        <span class="boot-stage" style="--i:2">waking the daemons</span>
+        <span class="boot-stage" style="--i:3">welcome back</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var boot = document.getElementById('bootScreen');
+      if (!boot) return;
+      var DURATION = 2400;
+      window.setTimeout(function () {
+        boot.classList.add('boot-done');
+        window.setTimeout(function () {
+          if (boot.parentNode) boot.parentNode.removeChild(boot);
+        }, 650);
+      }, DURATION);
+    })();
+  </script>
+
   <div class="dash-bg-grid"></div>
   <div class="dash-glow"></div>
   <div class="dash-glow-2"></div>
