@@ -1601,7 +1601,8 @@ body.modal-open .easter-egg {
 }
 
 .easter-egg:hover .easter-egg-img,
-.easter-egg:focus-visible .easter-egg-img {
+.easter-egg:focus-visible .easter-egg-img,
+.easter-egg.touched .easter-egg-img {
   transform: rotate(0deg) scale(1.08);
   box-shadow: 0 6px 22px rgba(0,0,0,0.5), 0 0 18px var(--cyan-glow);
 }
@@ -1643,7 +1644,8 @@ body.modal-open .easter-egg {
 }
 
 .easter-egg:hover .easter-egg-bubble,
-.easter-egg:focus-visible .easter-egg-bubble {
+.easter-egg:focus-visible .easter-egg-bubble,
+.easter-egg.touched .easter-egg-bubble {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
