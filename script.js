@@ -57,7 +57,94 @@ try {
   });
   setupModal('openDiscord', 'discordModal', 'closeDiscord');
   setupModal('openAbout', 'aboutModal', 'closeAbout');
+  setupModal('openBook', 'bookModal', 'closeBook');
 } catch (e) { console.error('modal setup failed:', e); }
+
+
+
+/* ── Book of Dragons ── */
+try {
+(function () {
+  const dragons = [
+    { name: 'Night Fury', cls: 'Strike', size: 'Small, lean build', weight: 'Light for its length', behaviour: 'Extremely rare and intelligent; cautious of strangers but fiercely loyal once bonded.' },
+    { name: 'Light Fury', cls: 'Strike', size: 'Small, lean build', weight: 'Light for its length', behaviour: 'Wild and wary of humans; can turn invisible-ish via camouflage scales.' },
+    { name: 'Deadly Nadder', cls: 'Sharp', size: 'Medium', weight: 'Moderate, agile flier', behaviour: 'Vain and proud; loves attention and being praised, fires spines when threatened.' },
+    { name: 'Monstrous Nightmare', cls: 'Stoker', size: 'Large', weight: 'Heavy, powerful build', behaviour: 'Hot-tempered and aggressive at first, but becomes a stubbornly loyal companion once trained.' },
+    { name: 'Hideous Zippleback', cls: 'Mystery', size: 'Large, two-headed', weight: 'Heavy, twin-bodied', behaviour: 'Mischievous and a little dim; the two heads have to work together to attack (gas + spark).' },
+    { name: 'Gronckle', cls: 'Boulder', size: 'Stocky, compact', weight: 'Very heavy for its size', behaviour: 'Lazy and easygoing despite eating rocks; surprisingly strong fliers once moving.' },
+    { name: 'Terrible Terror', cls: 'Stoker', size: 'Tiny', weight: 'Very light', behaviour: 'Feisty and sneaky, hunts and travels in swarms, has a venomous bite for its size.' },
+    { name: 'Red Death', cls: 'Boulder (Queen)', size: 'Colossal, mountain-sized', weight: 'Immense', behaviour: 'A ruthless hive-queen that commands smaller dragons to feed it; territorial and dangerous.' },
+    { name: 'Changewing', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Shy unless protecting its young, can camouflage and spits corrosive acid.' },
+    { name: 'Whispering Death', cls: 'Boulder', size: 'Large, serpentine', weight: 'Heavy', behaviour: 'Relentless burrower with rings of teeth; territorial and dangerous underground.' },
+    { name: 'Skrill', cls: 'Strike (Lightning)', size: 'Medium-large', weight: 'Moderate, built for speed', behaviour: 'Solitary and rare; channels lightning, considered one of the most powerful dragons.' },
+    { name: 'Scauldron', cls: 'Tidal', size: 'Large, eel-like', weight: 'Heavy', behaviour: 'Patient ambush predator that blasts boiling water at prey.' },
+    { name: 'Snaptrapper', cls: 'Mystery', size: 'Large, six-headed', weight: 'Heavy, group body', behaviour: 'Territorial pack hunters that coordinate their many heads to corner prey.' },
+    { name: 'Speed Stinger', cls: 'Tracker', size: 'Small, sleek', weight: 'Light, built for speed', behaviour: 'Hunts in packs with a paralyzing sting; avoids deep water.' },
+    { name: 'Boneknapper', cls: 'Mystery', size: 'Large', weight: 'Heavy', behaviour: 'Elusive and almost mythical; camouflages itself with bones and is patient to the point of holding grudges.' },
+    { name: 'Razorwhip', cls: 'Sharp', size: 'Medium-large', weight: 'Moderate, blade-edged scales', behaviour: 'Proud and graceful in flight; fiercely loyal once a bond is formed.' },
+    { name: 'Stormcutter', cls: 'Tracker', size: 'Large, four-winged', weight: 'Heavy', behaviour: 'Highly intelligent and family-oriented; very protective of its rider and kin.' },
+    { name: 'Typhoomerang', cls: 'Stoker', size: 'Large', weight: 'Heavy', behaviour: 'Ferociously protective parent, attacks in a spinning tornado of fire.' },
+    { name: 'Thunderdrum', cls: 'Tidal', size: 'Large, dolphin-like', weight: 'Heavy', behaviour: 'Cautious around new people but loyal once trusted; stuns enemies with a sonic roar.' },
+    { name: 'Smothering Smokebreath', cls: 'Mystery', size: 'Small', weight: 'Light', behaviour: 'Mischievous and a bit of a thief, hides in thick self-made smokescreens.' },
+    { name: 'Fireworm', cls: 'Stoker', size: 'Tiny, caterpillar-like', weight: 'Very light', behaviour: 'Lives in large colonies and is placid unless its nest is disturbed.' },
+    { name: 'Bewilderbeast', cls: 'Tidal (Alpha)', size: 'Colossal', weight: 'Immense', behaviour: 'A calm, commanding alpha that controls and protects an entire dragon nest using ice breath.' },
+    { name: 'Screaming Death', cls: 'Boulder', size: 'Massive', weight: 'Very heavy', behaviour: 'An obsessive, relentless burrower related to the Whispering Death, known for its piercing screech.' },
+    { name: 'Flightmare', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Eerie and nocturnal, glows and can freeze enemies in place with a paralyzing gaze.' },
+    { name: 'Catastrophic Quaken', cls: 'Boulder', size: 'Large, rock-plated', weight: 'Very heavy', behaviour: 'Territorial and easily startled; causes tremors when it stomps.' },
+    { name: 'Death Song', cls: 'Mystery', size: 'Large', weight: 'Heavy', behaviour: 'Predatory and dangerous when hungry, lures prey with a hypnotic song and traps them in amber.' },
+    { name: 'Snow Wraith', cls: 'Strike', size: 'Medium, eyeless', weight: 'Moderate', behaviour: 'Elusive and fiercely territorial, navigates icy terrain using heat-sensing instead of sight.' },
+    { name: 'Buffalord', cls: 'Tracker', size: 'Bulky', weight: 'Heavy, can inflate further when threatened', behaviour: 'Calm grazer that only turns defensive when provoked.' },
+    { name: 'Eruptodon', cls: 'Boulder', size: 'Large', weight: 'Very heavy', behaviour: 'A gentle giant that eats lava rock and sneezes fireballs when it has a cold.' },
+    { name: 'Armorwing', cls: 'Sharp', size: 'Medium', weight: 'Moderate, metallic scales', behaviour: 'Curious and generally docile, with magnetic abilities tied to its metal-like hide.' },
+    { name: 'Triple Stryke', cls: 'Strike', size: 'Large', weight: 'Heavy', behaviour: 'Aggressive and territorial; wields three tail stingers each with a different venom.' },
+    { name: 'Sand Wraith', cls: 'Tracker', size: 'Medium', weight: 'Moderate', behaviour: 'Elusive and social in small groups, blends into sand and leaves a glowing trail.' },
+    { name: 'Groncicle', cls: 'Boulder', size: 'Stocky', weight: 'Heavy', behaviour: 'A calm, slow-moving cousin of the Gronckle that breathes ice instead of fire.' },
+    { name: 'Singetail', cls: 'Stoker', size: 'Medium, twin-tailed', weight: 'Moderate', behaviour: 'Hot-tempered and protective, capable of setting its own tails alight.' },
+    { name: 'Woolly Howl', cls: 'Tracker', size: 'Large, thick-furred', weight: 'Heavy', behaviour: 'Cautious and family-oriented; flies almost silently thanks to its fur and sound-based stealth.' },
+    { name: 'Shivertooth', cls: 'Boulder', size: 'Large, burrowing', weight: 'Heavy', behaviour: 'Mostly solitary and territorial, tunnels through rock like a mole.' },
+    { name: 'Grapple Grounder', cls: 'Mystery', size: 'Medium', weight: 'Moderate', behaviour: 'Cunning and opportunistic, uses a grappling-hook tail to snare prey.' },
+    { name: 'Hobblegrunt', cls: 'Tracker', size: 'Medium, two-headed', weight: 'Moderate', behaviour: 'Docile, herbivorous grazer, generally calm around others.' },
+    { name: 'Mudraker', cls: 'Boulder', size: 'Medium', weight: 'Moderate', behaviour: 'Placid and easily startled, prefers wallowing in mud over confrontation.' },
+    { name: 'Raincutter', cls: 'Tidal', size: 'Large', weight: 'Heavy', behaviour: 'Playful and fast in water, propelled by powerful jets of water.' },
+  ];
+
+  const listEl   = document.getElementById('bookList');
+  const searchEl = document.getElementById('bookSearch');
+  const countEl  = document.getElementById('bookCount');
+  if (!listEl || !searchEl) return;
+
+  function render(filter) {
+    const q = (filter || '').trim().toLowerCase();
+    const filtered = dragons.filter(d =>
+      d.name.toLowerCase().includes(q) || d.cls.toLowerCase().includes(q)
+    );
+
+    if (countEl) countEl.textContent = `${filtered.length} / ${dragons.length}`;
+
+    if (!filtered.length) {
+      listEl.innerHTML = '<p class="book-list-empty">no dragons match that search</p>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(d => `
+      <div class="dragon-card">
+        <div class="dragon-card-head">
+          <span class="dragon-card-name">${d.name}</span>
+          <span class="dragon-card-class">${d.cls}</span>
+        </div>
+        <div class="dragon-card-stats">
+          <span><b>Size:</b> ${d.size}</span>
+          <span><b>Weight:</b> ${d.weight}</span>
+        </div>
+        <p class="dragon-card-behaviour">${d.behaviour}</p>
+      </div>
+    `).join('');
+  }
+
+  render('');
+  searchEl.addEventListener('input', () => render(searchEl.value));
+})();
+} catch (e) { console.error('book of dragons setup failed:', e); }
 
 
 
