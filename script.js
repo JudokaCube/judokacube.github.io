@@ -1,12 +1,263 @@
 /* ============================================
-   Book of Dragons — script.js
+   JDKCube — script.js
    ============================================ */
 
 'use strict';
 
+/* Wrap everything to guarantee the DOM is ready before we touch it,
+   and so each feature is isolated — one failing section won't
+   silently take the rest of the page's interactivity down with it. */
 document.addEventListener('DOMContentLoaded', function () {
 
-/* ── Theme toggle (dark / light), shared storage key with the rest of the site ── */
+/* ── Modal system (Terminal + Discord) ── */
+function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
+  const openBtn  = document.getElementById(openBtnId);
+  const modal    = document.getElementById(modalId);
+  const closeBtn = document.getElementById(closeBtnId);
+  if (!openBtn || !modal || !closeBtn) return;
+
+  let openedOnce = false;
+
+  function open() {
+    modal.classList.add('open');
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+
+    // close music volume panel if it's open, so nothing visually overlaps
+    const musicWidget = document.getElementById('musicWidget');
+    if (musicWidget) musicWidget.classList.remove('open');
+
+    if (!openedOnce && typeof onFirstOpen === 'function') {
+      openedOnce = true;
+      onFirstOpen();
+    }
+  }
+
+  function close() {
+    modal.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+  }
+
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) close();
+  });
+}
+
+try {
+  setupModal('openTerminal', 'terminalModal', 'closeTerminal', () => {
+    if (typeof initPyodideTerminal === 'function') initPyodideTerminal();
+  });
+  setupModal('openDiscord', 'discordModal', 'closeDiscord');
+  setupModal('openAbout', 'aboutModal', 'closeAbout');
+  setupModal('openSpecs', 'specsModal', 'closeSpecs');
+  setupModal('openMcSkin', 'mcSkinModal', 'closeMcSkin', () => {
+    if (typeof initMcSkinViewer === 'function') initMcSkinViewer();
+  });
+} catch (e) { console.error('modal setup failed:', e); }
+
+
+
+
+/* ── Python terminal (Pyodide REPL) ── */
+let initPyodideTerminal = function () {};
+
+try {
+(function () {
+  const statusEl = document.getElementById('termStatus');
+  const outputEl = document.getElementById('termOutput');
+  const inputEl  = document.getElementById('termInput');
+  const bodyEl   = document.getElementById('termBody');
+  if (!inputEl) return;
+
+  let pyodide   = null;
+  let history   = [];
+  let histIndex = -1;
+
+  function appendLine(text, cls) {
+    const span = document.createElement('div');
+    span.className = cls || '';
+    span.textContent = text;
+    outputEl.appendChild(span);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  function printWelcome() {
+    appendLine('Python 3.11 (Pyodide) — running entirely in your browser', 'term-line-sys');
+    appendLine('Type python code below and hit enter. No server involved.', 'term-line-sys');
+    appendLine('', '');
+  }
+
+  async function initPyodide() {
+    statusEl.textContent = 'loading…';
+
+    if (typeof loadPyodide !== 'function') {
+      statusEl.textContent = 'failed to load';
+      statusEl.style.color = '#ff6b6b';
+      appendLine('Pyodide script did not load (likely blocked by network/adblock/CSP). Try disabling any ad blocker or content blocker for this site and refresh.', 'term-line-err');
+      return;
+    }
+
+    try {
+      const loadPromise = loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'
+      });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timed out after 25s — slow or blocked connection')), 25000)
+      );
+
+      pyodide = await Promise.race([loadPromise, timeoutPromise]);
+
+      // redirect stdout/stderr into our terminal
+      pyodide.setStdout({ batched: (s) => appendLine(s, 'term-line-out') });
+      pyodide.setStderr({ batched: (s) => appendLine(s, 'term-line-err') });
+
+      statusEl.textContent = 'ready';
+      statusEl.classList.add('ready');
+      inputEl.disabled = false;
+      inputEl.placeholder = 'type python here…';
+      inputEl.focus();
+
+      // help() tries to open an interactive pager that reads stdin, which
+      // doesn't exist in this environment and throws an I/O error. Patch it
+      // to just print the help text instead, like a non-interactive call.
+      try {
+        await pyodide.runPythonAsync(`
+import pydoc, builtins
+
+def _browser_help(*args):
+    if not args:
+        print("Type help(object) for help on a specific module, function, class, etc.")
+        return
+    text = pydoc.render_doc(args[0], renderer=pydoc.plaintext)
+    print(text)
+
+builtins.help = _browser_help
+        `);
+      } catch (patchErr) {
+        // non-fatal — if this fails, help() will still mostly work for simple cases
+      }
+
+      printWelcome();
+    } catch (err) {
+      statusEl.textContent = 'failed to load';
+      statusEl.style.color = '#ff6b6b';
+      appendLine('Could not load the Python runtime: ' + (err && err.message ? err.message : err), 'term-line-err');
+      appendLine('Check your internet connection, disable any ad/script blockers for this site, and refresh.', 'term-line-sys');
+    }
+  }
+
+  async function runCode(code) {
+    appendLine(code, 'term-line-in');
+
+    if (code.trim() === 'clear') {
+      outputEl.innerHTML = '';
+      return;
+    }
+
+    try {
+      let result = await pyodide.runPythonAsync(code);
+      if (result !== undefined && result !== null) {
+        appendLine(String(result), 'term-line-out');
+      }
+    } catch (err) {
+      // Pyodide errors are verbose Python tracebacks — show the last meaningful line
+      const msg = String(err);
+      const lines = msg.trim().split('\n');
+      appendLine(lines[lines.length - 1] || msg, 'term-line-err');
+    }
+  }
+
+  inputEl.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+      const code = inputEl.value;
+      if (!code.trim() || !pyodide) return;
+
+      history.push(code);
+      histIndex = history.length;
+      inputEl.value = '';
+      inputEl.disabled = true;
+
+      await runCode(code);
+
+      inputEl.disabled = false;
+      inputEl.focus();
+    } else if (e.key === 'ArrowUp') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIndex = Math.max(0, histIndex - 1);
+      inputEl.value = history[histIndex] || '';
+    } else if (e.key === 'ArrowDown') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIndex = Math.min(history.length, histIndex + 1);
+      inputEl.value = history[histIndex] || '';
+    }
+  });
+
+  // Clicking anywhere in the terminal body focuses the input
+  bodyEl.addEventListener('click', () => {
+    if (!inputEl.disabled) inputEl.focus();
+  });
+
+  // Only load Pyodide the first time the terminal modal is opened
+  initPyodideTerminal = function () {
+    if (!pyodide) initPyodide();
+  };
+})();
+} catch (e) { console.error('terminal setup failed:', e); }
+
+/* ── Per-tile spotlight + subtle 3D tilt ── */
+try {
+(function () {
+  const tiles = document.querySelectorAll('.tile');
+  const MAX_TILT = 4; // degrees, kept subtle
+
+  tiles.forEach((tile) => {
+    let rect = null;
+    let pending = null;
+
+    tile.addEventListener('mouseenter', () => {
+      rect = tile.getBoundingClientRect();
+      tile.classList.remove('tile-resetting');
+    });
+
+    tile.addEventListener('mousemove', (e) => {
+      if (!rect) rect = tile.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (pending) return;
+      pending = requestAnimationFrame(() => {
+        pending = null;
+        tile.style.setProperty('--mx', x + 'px');
+        tile.style.setProperty('--my', y + 'px');
+
+        const px = (x / rect.width) - 0.5;
+        const py = (y / rect.height) - 0.5;
+        const rotateY = (px * MAX_TILT * 2).toFixed(2);
+        const rotateX = (py * -MAX_TILT * 2).toFixed(2);
+        tile.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px)`;
+      });
+    });
+
+    tile.addEventListener('mouseleave', () => {
+      rect = null;
+      tile.classList.add('tile-resetting');
+      tile.style.transform = '';
+    });
+  });
+})();
+} catch (e) { console.error('tile tilt setup failed:', e); }
+
+/* ── Theme toggle (dark / light) ── */
 try {
 (function () {
   const root   = document.documentElement;
@@ -26,345 +277,480 @@ try {
 })();
 } catch (e) { console.error('theme toggle setup failed:', e); }
 
-
-
-/* ── Dragon data + grid ── */
+/* ── Music player ── */
 try {
 (function () {
+  const audio   = document.getElementById('bgMusic');
+  const widget  = document.getElementById('musicWidget');
+  const btn     = document.getElementById('musicBtn');
+  const panel   = document.getElementById('musicPanel');
+  const slider  = document.getElementById('volumeSlider');
+  const pauseBtn = document.getElementById('musicPauseBtn');
 
-  // Class badges now live locally as assets/<class>.png (the real HTTYD
-  // class emblems, dropped in by hand) — this just maps each class name
-  // to its filename and renders an <img>, sized/rounded by CSS depending
-  // on where it's used (filter chip, class tag, or big tile icon).
-  const CLASS_ICON_FILES = {
-    Stoker: 'stoker.png',
-    Sharp: 'sharp.png',
-    Strike: 'strike.png',
-    Tidal: 'tidal.png',
-    Boulder: 'boulder.png',
-    Tracker: 'tracker.png',
-    Mystery: 'mystery.png',
-  };
+  let playing = false;
+  let open    = false;
 
-  function classIcon(cls) {
-    const base = cls.split(' (')[0];
-    const file = CLASS_ICON_FILES[base] || CLASS_ICON_FILES.Mystery;
-    return `<img src="assets/${file}" alt="${base} class" loading="lazy" />`;
-  }
+  // Set initial volume
+  audio.volume = slider.value / 100;
+  updateSliderFill();
 
-  const dragons = [
-    { name: 'Abomibumble', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Armorwing', cls: 'Sharp', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Curious and generally docile, with magnetic abilities tied to its metal-like hide.', appears: 'Race to the Edge' },
-    { name: 'Barklethorn', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Bewilderbeast', cls: 'Tidal (Alpha)', size: '≈ 158 m long · 45.7 m wingspan', weight: '≈ 90,700 kg', behaviour: 'A calm, commanding alpha that controls and protects an entire dragon nest using ice breath.', appears: 'HTTYD 2 (2014)' },
-    { name: 'Boneknapper', cls: 'Mystery', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Elusive and almost mythical; camouflages itself with bones and is patient to the point of holding grudges.', appears: 'Legend of the Boneknapper Dragon (short)' },
-    { name: 'Bonestormer', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Boomback', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Bubblegill', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Bubblehorn', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Buffalord', cls: 'Tracker', size: '≈ 6–10 m long, thickset (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Calm grazer that only turns defensive when provoked.', appears: 'Race to the Edge' },
-    { name: 'Catastrophic Quaken', cls: 'Boulder', size: '≈ 12–20 m long (est.)', weight: '≈ 5,000–10,000 kg (est.)', behaviour: 'Territorial and easily startled; causes tremors when it stomps.', appears: 'Race to the Edge' },
-    { name: 'Cavern Crasher', cls: 'Boulder', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Changewing', cls: 'Mystery', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Shy unless protecting its young, can camouflage and spits corrosive acid.', appears: 'Riders of Berk' },
-    { name: 'Chaperang', cls: 'Tracker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Chillblaster', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Chimeragon', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A human-made hybrid dragon rather than a naturally occurring species, stitched together from traits of others.', appears: 'Extended franchise (games)' },
-    { name: 'Copyclaw', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Crimson Goregutter', cls: 'Sharp', size: '≈ 12–20 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Mostly peaceful grazer with large antler-like horns, but will fight fiercely if cornered.', appears: 'Race to the Edge' },
-    { name: 'Crimson Howler', cls: 'Tracker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Crimson Slasher', cls: 'Sharp', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Quick and aggressive, with blade-like claws built for slashing through dense brush.', appears: 'Race to the Edge' },
-    { name: 'Deadly Nadder', cls: 'Sharp', size: '9.1 m long · 12.8 m wingspan', weight: '≈ 1,192 kg', behaviour: 'Vain and proud; loves attention and being praised, fires spines when threatened.', appears: 'How to Train Your Dragon (2010)' },
-    { name: 'Deadly Spinner', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Death Song', cls: 'Mystery', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Predatory and dangerous when hungry, lures prey with a hypnotic song and traps them in amber.', appears: 'Race to the Edge' },
-    { name: 'Deathgripper', cls: 'Strike', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Highly aggressive and territorial, with a venomous stinger and crushing claws; very difficult to tame.', appears: 'HTTYD: The Hidden World (2019)' },
-    { name: 'Devilish Dervish', cls: 'Mystery', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Erratic, spinning flight pattern makes it hard to predict or pin down.', appears: 'Race to the Edge' },
-    { name: 'Divewing', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Dramillion', cls: 'Tracker', size: '≈ 6–12 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Playful and mischievous, with unusually nimble limbs for climbing and grabbing.', appears: 'Race to the Edge' },
-    { name: 'Egg Biter', cls: 'Sharp', size: 'Medium-sized, stockily built (est.)', weight: 'Not officially documented', behaviour: 'Bites the first thing it sees the moment it hatches and stays fiercely protective of its rider ever after; a sturdy, thick-tailed dragon that fires an especially hot blue flame.', appears: 'How to Train Your Dragon Live Spectacular (2012)' },
-    { name: 'Eruptodon', cls: 'Boulder', size: '≈ 12–20 m long (est.)', weight: '≈ 5,000–10,000 kg (est.)', behaviour: 'A gentle giant that eats lava rock and sneezes fireballs when it has a cold.', appears: 'Race to the Edge' },
-    { name: 'Evolved Scuttleclaw', cls: 'Tracker', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'A stronger, more vividly-patterned variant of the Scuttleclaw seen in spin-off games rather than the TV series.', appears: 'Extended franchise (mobile games)' },
-    { name: 'Fastfin', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Fathomfin', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Fault Ripper', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Featherhide', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Fire Fury', cls: 'Stoker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Fire Terror', cls: 'Stoker', size: 'Similar in size to a Night Terror (small)', weight: 'Not officially documented', behaviour: 'A red-hued Night Terror subspecies that lives in volcanic caves and eats fire and lava; hunts in packs but has a long-standing, protective bond with Eruptodon eggs.', appears: 'Race to the Edge ("Out of the Frying Pan")' },
-    { name: 'Firefang', cls: 'Stoker', size: 'Medium-sized (est.)', weight: 'Not officially documented', behaviour: 'Normally placid and curious, burrowing into shorelines with only its heated head-frill and fangs showing; became infamous after Drago Bludvist unleashed an armored Firefang on a meeting of chiefs.', appears: 'HTTYD 2 (2014)' },
-    { name: 'Fireworm', cls: 'Stoker', size: '≈ 5 cm long', weight: '≈ 0.34 kg', behaviour: 'Lives in large colonies and is placid unless its nest is disturbed.', appears: 'Riders of Berk' },
-    { name: 'Fireworm Queen', cls: 'Stoker', size: 'Comparable in size to a Boneknapper', weight: '≈ 2,778 kg (queen); ≈ 2,722–3,629 kg (plain queen variants)', behaviour: 'Highly aggressive and territorial while guarding her nest and firecombs, but not malicious; her venom can reignite a fellow Stoker Class dragon\'s dying flame, as she did for Snotlout\'s Hookfang.', appears: 'Defenders of Berk ("Race to Fireworm Island")' },
-    { name: 'Flame Thrower', cls: 'Stoker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Flame Whipper', cls: 'Stoker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Flightmare', cls: 'Mystery', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Eerie and nocturnal, glows and can freeze enemies in place with a paralyzing gaze.', appears: 'Race to the Edge' },
-    { name: 'Flood Fang', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Flyhopper', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Foreverhorn', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Foreverwing', cls: 'Tracker', size: '≈ 20–40 m long (est.)', weight: '≈ 20,000+ kg (est.)', behaviour: 'An ancient, long-lived species said to grow larger the longer it lives; generally reclusive.', appears: 'Race to the Edge' },
-    { name: 'Gem Blaster', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Gembreaker', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Gigantic Grumplumper', cls: 'Boulder', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Glass Caster', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Gobsucker', cls: 'Boulder', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Golden Dragon', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Grapple Grounder', cls: 'Mystery', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Cunning and opportunistic, uses a grappling-hook tail to snare prey.', appears: 'Race to the Edge' },
-    { name: 'Grapple Snapper', cls: 'Mystery', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Ambushes prey using strong jaws and a low, ground-hugging hunting style.', appears: 'Race to the Edge' },
-    { name: 'Green Death', cls: 'Boulder (Queen)', size: '≈ 30–160 m long (est.)', weight: '≈ 20,000+ kg (est.)', behaviour: 'A giant hive-queen dragon in the same mold as the Red Death, appearing in the wider franchise outside the first film.', appears: 'Extended franchise (comics/games)' },
-    { name: 'Grim Gnasher', cls: 'Stoker', size: '≈ 2–6 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Quick-tempered and snappy despite its small size, fiercely defends its space.', appears: 'Race to the Edge' },
-    { name: 'Groncicle', cls: 'Boulder', size: '≈ 6–10 m long, thickset (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'A calm, slow-moving cousin of the Gronckle that breathes ice instead of fire.', appears: 'Race to the Edge' },
-    { name: 'Gronckle', cls: 'Boulder', size: '4.5 m long · 5.5 m wingspan', weight: '≈ 2,596 kg', behaviour: 'Lazy and easygoing despite eating rocks; surprisingly strong fliers once moving.', appears: 'How to Train Your Dragon (2010)' },
-    { name: 'Hackatoo', cls: 'Sharp', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Restless and easily agitated, with sharp, axe-like head plating.', appears: 'Race to the Edge' },
-    { name: 'Hideous Heatwing', cls: 'Stoker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Hideous Zippleback', cls: 'Mystery', size: '20.1 m long · 11.6 m wingspan', weight: '≈ 2,738 kg', behaviour: 'Mischievous and a little dim; the two heads have to work together to attack (gas + spark).', appears: 'How to Train Your Dragon (2010)' },
-    { name: 'Hobblegrunt', cls: 'Tracker', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Docile, herbivorous grazer, generally calm around others.', appears: 'Race to the Edge' },
-    { name: 'Hobgobbler', cls: 'Tidal', size: '≈ 2–6 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Skittish scavenger that lives in burrows near water and steals food when it can.', appears: 'Race to the Edge' },
-    { name: 'Hotburple', cls: 'Boulder', size: '≈ 4.3 m long · 5.5 m wingspan', weight: '≈ 2,596 kg', behaviour: 'Sleepy and slow-moving, mostly harmless unless woken suddenly.', appears: 'Race to the Edge' },
-    { name: 'Jörmungandr', cls: 'Mystery', size: 'Unknown, said to be enormous', weight: 'Unknown', behaviour: 'A mythical serpent-dragon tied to Norse-inspired franchise lore rather than a confirmed, documented species.', appears: 'Referenced in franchise lore (mythical)' },
-    { name: 'Large Shadow Wing', cls: 'Strike', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Light Fury', cls: 'Strike', size: '≈ 2–6 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Wild and wary of humans; can turn invisible-ish via camouflage scales.', appears: 'HTTYD: The Hidden World (2019)' },
-    { name: 'Luminous Krayfin', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Lycanwing', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Treated by much of the fandom as a theoretical or unconfirmed species rather than an officially documented one.', appears: 'Disputed / theoretical (fan discussion)' },
-    { name: 'Magma Breather', cls: 'Stoker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Memorazor', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Mimicore', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Mist Twister', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Moldruffle', cls: 'Boulder', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Slow, gentle, and easily startled; camouflages well in forests and caves.', appears: 'Race to the Edge' },
-    { name: 'Monstrous Nightmare', cls: 'Stoker', size: '18.6 m long · 20.7 m wingspan', weight: '≈ 2,268 kg', behaviour: 'Hot-tempered and aggressive at first, but becomes a stubbornly loyal companion once trained.', appears: 'How to Train Your Dragon (2010)' },
-    { name: 'Mudraker', cls: 'Boulder', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Placid and easily startled, prefers wallowing in mud over confrontation.', appears: 'Race to the Edge' },
-    { name: 'Night Fury', cls: 'Strike', size: '7.9 m long · 13.7 m wingspan', weight: '≈ 806 kg', behaviour: 'Extremely rare and intelligent; cautious of strangers but fiercely loyal once bonded.', appears: 'How to Train Your Dragon (2010)' },
-    { name: 'Night Terror', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Octofin', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Piercing Shriekscale', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Prickleboggle', cls: 'Tracker', size: '≈ 2–6 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Shy and quick to flee, using sharp quills as its main defense.', appears: 'Race to the Edge' },
-    { name: 'Puffertail', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Purple Death', cls: 'Boulder (Queen)', size: '≈ 30–160 m long (est.)', weight: '≈ 20,000+ kg (est.)', behaviour: 'Another massive hive-queen species, generally treated as distinct from the Red and Green Death by fans.', appears: 'Extended franchise (comics/games)' },
-    { name: 'Raincutter', cls: 'Tidal', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Playful and fast in water, propelled by powerful jets of water.', appears: 'Race to the Edge' },
-    { name: 'Razortooth Metalmaw', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Razorwhip', cls: 'Sharp', size: '≈ 12–20 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Proud and graceful in flight; fiercely loyal once a bond is formed.', appears: 'Riders of Berk' },
-    { name: 'Red Death', cls: 'Boulder (Queen)', size: '≈ 121.9 m long · 167.6 m wingspan', weight: '≈ 9,979 kg', behaviour: 'A ruthless hive-queen that commands smaller dragons to feed it; territorial and dangerous.', appears: 'How to Train Your Dragon (2010)' },
-    { name: 'Relentless Rainbowhorn', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Relentless Razorwing', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Ripwrecker', cls: 'Tidal', size: '≈ 12–20 m long (est.)', weight: '≈ 5,000–10,000 kg (est.)', behaviour: 'Slow but unstoppable, plows through obstacles and ship hulls alike.', appears: 'Race to the Edge' },
-    { name: 'Roaming Ramblefang', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Rockspitter', cls: 'Boulder', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Rumblehorn', cls: 'Boulder', size: '≈ 12–20 m long (est.)', weight: '≈ 5,000–10,000 kg (est.)', behaviour: 'Calm and dependable, with thick plating and a powerful tusked headbutt.', appears: 'Race to the Edge' },
-    { name: 'Sand Wraith', cls: 'Tracker', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Elusive and social in small groups, blends into sand and leaves a glowing trail.', appears: 'Race to the Edge' },
-    { name: 'Sandbuster', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Scauldron', cls: 'Tidal', size: '≈ 31.3 m long · 31.8 m wingspan', weight: '≈ 1,361 kg', behaviour: 'Patient ambush predator that blasts boiling water at prey.', appears: 'Riders of Berk' },
-    { name: 'Screaming Death', cls: 'Boulder', size: '≈ 111 m long (est. from on-screen scale)', weight: 'Colossal (unpublished)', behaviour: 'An obsessive, relentless burrower related to the Whispering Death, known for its piercing screech.', appears: 'Defenders of Berk' },
-    { name: 'Scuttleclaw', cls: 'Tracker', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'A camouflage-capable dragon used by Dagur the Deranged; blends into rocky terrain and strikes from ambush.', appears: 'Dragons: Race to the Edge' },
-    { name: 'Sea Gronckle', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Seashocker', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Sentinel', cls: 'Boulder', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Guardian-like and protective of its territory, patient until provoked.', appears: 'Race to the Edge' },
-    { name: 'Shellfire', cls: 'Stoker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Shivertooth', cls: 'Boulder', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Mostly solitary and territorial, tunnels through rock like a mole.', appears: 'Race to the Edge' },
-    { name: 'Shockjaw', cls: 'Tidal', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Obsessive treasure-hoarder that stuns prey with an electric bite.', appears: 'Race to the Edge' },
-    { name: 'Shocktail', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Shovelhelm', cls: 'Boulder', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'A broad, shovel-headed digger Fishlegs briefly rode early in Race to the Edge before finding Meatlug\\\'s cousins elsewhere.', appears: 'Dragons: Race to the Edge' },
-    { name: 'Silkspanner', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Silver Phantom', cls: 'Stoker', size: '≈ 12–20 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Elusive and almost ghostlike in flight; rarely seen and highly intelligent.', appears: 'Extended franchise (HTTYD books & School of Dragons game)' },
-    { name: 'Silver-tailed Ironclaw', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Singetail', cls: 'Stoker', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Hot-tempered and protective, capable of setting its own tails alight.', appears: 'Race to the Edge' },
-    { name: 'Skrill', cls: 'Strike (Lightning)', size: 'Similar in size to a Scuttleclaw · ≈ 9.4 m wingspan', weight: 'Heavy (unpublished)', behaviour: 'Solitary and rare; channels lightning, considered one of the most powerful dragons.', appears: 'Defenders of Berk' },
-    { name: 'Sky Torcher', cls: 'Stoker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Slinkwing', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Slippery Slickscale', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Sliquifier', cls: 'Tidal', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Coats prey and surfaces in a slick secretion to immobilize or escape danger.', appears: 'Race to the Edge' },
-    { name: 'Slithersong', cls: 'Mystery', size: '≈ 6–12 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Uses a hypnotic singing call to lure and confuse prey before striking.', appears: 'Race to the Edge' },
-    { name: 'Slitherwing', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Slobber Smelter', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Small Shadow Wing', cls: 'Strike', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Smothering Smokebreath', cls: 'Mystery', size: '≈ 1.8 m long · 3 m wingspan', weight: '≈ 64 kg', behaviour: 'Mischievous and a bit of a thief, hides in thick self-made smokescreens.', appears: 'Riders of Berk' },
-    { name: 'Snafflefang', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Snaptrapper', cls: 'Mystery', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Territorial pack hunters that coordinate their many heads to corner prey.', appears: 'Riders of Berk' },
-    { name: 'Snifflehide', cls: 'Tracker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Snifflehunch', cls: 'Tracker', size: '≈ 6–12 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Has an extraordinary sense of smell, used to track prey and other dragons over long distances.', appears: 'Race to the Edge' },
-    { name: 'Snow Wraith', cls: 'Strike', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Elusive and fiercely territorial, navigates icy terrain using heat-sensing instead of sight.', appears: 'Race to the Edge' },
-    { name: 'Snowtail', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Songwing', cls: 'Tracker', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'A tuneful, social dragon from the spin-off series set in its own corner of the wider dragon world.', appears: 'Dragons: Rescue Riders (spin-off)' },
-    { name: 'Speed Stinger', cls: 'Tracker', size: '≈ 2–6 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Hunts in packs with a paralyzing sting; avoids deep water.', appears: 'Riders of Berk' },
-    { name: 'Spiderwing', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Stinger', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Stinkwing', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Stormcutter', cls: 'Tracker', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Highly intelligent and family-oriented; very protective of its rider and kin.', appears: 'HTTYD 2 (2014)' },
-    { name: 'Submaripper', cls: 'Tidal', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'A deep-sea ambush hunter rarely seen at the surface; aggressive toward anything that strays into its waters.', appears: 'Race to the Edge' },
-    { name: 'Sweet Death', cls: 'Mystery', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Lures victims in with an irresistibly sweet scent before trapping them in sticky resin.', appears: 'Race to the Edge' },
-    { name: 'Swiftwing', cls: 'Strike', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Sword Stealer', cls: 'Sharp', size: '≈ 6–12 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Dagur the Deranged\\\'s original mount before Shattermaster; agile and blade-tailed, true to its Sharp-class roots.', appears: 'Dragons: Race to the Edge' },
-    { name: 'Terrible Terror', cls: 'Stoker', size: '≈ 1.8 m long · 1.8 m wingspan', weight: '≈ 9 kg', behaviour: 'Feisty and sneaky, hunts and travels in swarms, has a venomous bite for its size.', appears: 'How to Train Your Dragon (2010)' },
-    { name: 'Thornridge', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Threadtail', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Three-Wing Thrasher', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Thunderclaw', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Thunderdrum', cls: 'Tidal', size: '≈ 20.7 m long · 16.3 m wingspan', weight: '≈ 408 kg', behaviour: 'Cautious around new people but loyal once trusted; stuns enemies with a sonic roar.', appears: 'Riders of Berk' },
-    { name: 'Thunderpede', cls: 'Strike', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Tide Glider', cls: 'Tidal', size: '≈ 6–12 m long (est.)', weight: '≈ 50–300 kg (est.)', behaviour: 'Calm and social, glides gracefully along the ocean surface in small groups.', appears: 'Race to the Edge' },
-    { name: 'Timberjack', cls: 'Sharp', size: '≈ 18–25 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Aloof and territorial, can launch razor-edged wingblasts to fell trees and enemies alike.', appears: 'Race to the Edge' },
-    { name: 'Tormentipede', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Triple Stryke', cls: 'Strike', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Aggressive and territorial; wields three tail stingers each with a different venom.', appears: 'Race to the Edge' },
-    { name: 'Vine Tail', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Wave Glider', cls: 'Tidal', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Appears in the extended franchise outside the main films/series; specifics haven\\\'t been fleshed out much yet.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Whispering Death', cls: 'Boulder', size: '15.2 m long · 3 m wingspan', weight: 'Very heavy (unpublished)', behaviour: 'Relentless burrower with rings of teeth; territorial and dangerous underground.', appears: 'Riders of Berk' },
-    { name: 'Whistling Windwing', cls: 'Strike', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Whooping Whifflewing', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Windgnasher', cls: 'Strike', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Windstriker', cls: 'Sharp', size: '≈ 12–20 m long (est.)', weight: '≈ 400–1,200 kg (est.)', behaviour: 'Peaceful but a capable fighter when provoked, breathes superheated air instead of flame and can dive-bomb foes head-on.', appears: 'How to Train Your Dragon 2 (2014)' },
-    { name: 'Windwalker', cls: 'Tracker', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Wise and ancient, said to be able to sense danger on the wind long before it arrives.', appears: 'Race to the Edge' },
-    { name: 'Woodchipper', cls: 'Sharp', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'One of the many species catalogued by the wider fandom rather than featured heavily on-screen; details are sparse.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Woolly Howl', cls: 'Tracker', size: '≈ 12–20 m long (est.)', weight: '≈ 1,500–4,000 kg (est.)', behaviour: 'Cautious and family-oriented; flies almost silently thanks to its fur and sound-based stealth.', appears: 'Race to the Edge' },
-    { name: 'Yetiwing', cls: 'Tracker', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'A lesser-documented species from the wider franchise (mobile games, comics or spin-offs); solid canon detail is still thin.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Zoomerang', cls: 'Mystery', size: 'Not officially documented', weight: 'Not officially documented', behaviour: 'Mostly known from spin-off games and comics rather than the films or TV series, so confirmed details remain limited.', appears: 'Extended franchise (games, comics & spin-offs)' },
-    { name: 'Typhoomerang', cls: 'Stoker', size: '≈ 10.7 m long · 15.2 m wingspan', weight: '≈ 431 kg', behaviour: 'Ferociously protective parent, attacks in a spinning tornado of fire.', appears: 'Riders of Berk (‘The Terrible Twos’)' },
-  ];
+  // Toggle panel open/close on button click
+  btn.addEventListener('click', () => {
+    if (!open) {
+      open = true;
+      widget.classList.add('open');
 
-  const gridEl    = document.getElementById('dragonsGrid');
-  const searchEl  = document.getElementById('dragonsSearch');
-  const countEl   = document.getElementById('dragonsCount');
-  const emptyEl   = document.getElementById('dragonsEmpty');
-  const filterRow = document.getElementById('dragonsFilterRow');
-  const sortRow   = document.getElementById('dragonsSortRow');
-  if (!gridEl || !searchEl || !filterRow) return;
-
-  // build class filter chips from the data itself, so it stays in sync
-  const classNames = Array.from(new Set(dragons.map(d => d.cls.split(' (')[0]))).sort();
-  classNames.forEach(cls => {
-    const chip = document.createElement('button');
-    chip.className = 'dragons-filter-chip';
-    chip.dataset.class = cls;
-    chip.innerHTML = `<span class="dragons-filter-chip-icon">${classIcon(cls)}</span><span>${cls}</span>`;
-    filterRow.appendChild(chip);
+      // Start music on first interaction (browser autoplay policy)
+      if (!playing) {
+        audio.play().then(() => {
+          playing = true;
+          btn.classList.add('playing');
+          if (pauseBtn) pauseBtn.classList.remove('paused');
+        }).catch(() => {});
+      }
+    } else {
+      open = false;
+      widget.classList.remove('open');
+    }
   });
 
-  let activeClass = 'all';
-  let activeSort  = 'alpha';
-
-  function sortDragons(list) {
-    const sorted = list.slice();
-    if (activeSort === 'class') {
-      sorted.sort((a, b) => {
-        const clsA = a.cls.split(' (')[0], clsB = b.cls.split(' (')[0];
-        return clsA.localeCompare(clsB) || a.name.localeCompare(b.name);
-      });
-    } else if (activeSort === 'appears') {
-      sorted.sort((a, b) => a.appears.localeCompare(b.appears) || a.name.localeCompare(b.name));
-    } else {
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
+  // Close panel when clicking outside
+  document.addEventListener('click', e => {
+    if (!widget.contains(e.target) && open) {
+      open = false;
+      widget.classList.remove('open');
     }
-    return sorted;
-  }
+  });
 
-  function cardHTML(d) {
-    const icon = classIcon(d.cls);
-    return `
-      <article class="dragon-tile">
-        <div class="dragon-tile-image">
-          <span class="dragon-tile-image-icon">${icon}</span>
-          <span class="dragon-tile-image-label">image coming soon</span>
-        </div>
-        <div class="dragon-tile-body">
-          <div class="dragon-tile-head">
-            <h3 class="dragon-tile-name">${d.name}</h3>
-            <span class="dragon-tile-class"><span class="dragon-tile-class-icon">${icon}</span>${d.cls} Class</span>
-          </div>
-          <div class="dragon-tile-meta">
-            <span><b>Size</b> ${d.size}</span>
-            <span><b>Weight</b> ${d.weight}</span>
-            <span><b>First appearance</b> ${d.appears}</span>
-          </div>
-          <p class="dragon-tile-behaviour">${d.behaviour}</p>
-        </div>
-      </article>
-    `;
-  }
-
-  function render() {
-    const q = searchEl.value.trim().toLowerCase();
-
-    const filtered = dragons.filter(d => {
-      const matchesClass = activeClass === 'all' || d.cls.split(' (')[0] === activeClass;
-      const matchesQuery =
-        !q ||
-        d.name.toLowerCase().includes(q) ||
-        d.cls.toLowerCase().includes(q) ||
-        d.appears.toLowerCase().includes(q);
-      return matchesClass && matchesQuery;
+  // Play / pause button inside the panel
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (playing) {
+        audio.pause();
+        playing = false;
+        btn.classList.remove('playing');
+        pauseBtn.classList.add('paused');
+        pauseBtn.setAttribute('aria-label', 'Play music');
+      } else {
+        audio.play().then(() => {
+          playing = true;
+          btn.classList.add('playing');
+          pauseBtn.classList.remove('paused');
+          pauseBtn.setAttribute('aria-label', 'Pause music');
+        }).catch(() => {});
+      }
     });
+  }
 
-    if (countEl) countEl.textContent = `${filtered.length} / ${dragons.length}`;
+  // Volume slider
+  slider.addEventListener('input', () => {
+    audio.volume = slider.value / 100;
+    updateSliderFill();
+  });
 
-    if (!filtered.length) {
-      gridEl.innerHTML = '';
-      if (emptyEl) emptyEl.hidden = false;
+  function updateSliderFill() {
+    slider.style.setProperty('--val', slider.value + '%');
+  }
+})();
+} catch (e) { console.error('music player setup failed:', e); }
+
+/* ── Easter egg (corner pfp) ──
+   This link previously relied only on CSS :hover/:focus-visible to reveal
+   the "click me" bubble and animate the avatar. Touch devices have no real
+   hover state, so the first tap just triggered the hover styles instead of
+   following the link — visitors had to tap twice. We add a small JS-driven
+   "touched" state so a single tap reveals the bubble immediately and the
+   link still navigates normally right after. */
+try {
+(function () {
+  const egg = document.getElementById('easterEgg');
+  if (!egg) return;
+
+  egg.addEventListener('touchstart', () => {
+    egg.classList.add('touched');
+  }, { passive: true });
+})();
+} catch (e) { console.error('easter egg setup failed:', e); }
+
+try {
+const copyBtn = document.getElementById('copyBtn');
+if (copyBtn) {
+  let resetTimer = null;
+
+  copyBtn.addEventListener('click', async () => {
+    const username = 'judokacube';
+
+    try {
+      await navigator.clipboard.writeText(username);
+    } catch {
+      /* fallback for older browsers */
+      const ta = document.createElement('textarea');
+      ta.value = username;
+      ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    copyBtn.classList.add('copied');
+    copyBtn.setAttribute('aria-label', 'Username copied!');
+
+    if (resetTimer) clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      copyBtn.classList.remove('copied');
+      copyBtn.setAttribute('aria-label', 'Copy username to clipboard');
+    }, 2000);
+  });
+}
+} catch (e) { console.error('copy button setup failed:', e); }
+
+/* ── Live Discord activity (Lanyard) ── */
+try {
+(function () {
+  const DISCORD_USER_ID = '820292272209002526';
+  const POLL_MS = 20000;
+
+  const dot         = document.getElementById('daStatusDot');
+  const statusText  = document.getElementById('daStatusText');
+  const activityBox = document.getElementById('daActivity');
+  const activityImg = document.getElementById('daActivityImg');
+  const activityName = document.getElementById('daActivityName');
+  const activityDetail = document.getElementById('daActivityDetail');
+  const activityState = document.getElementById('daActivityState');
+  const emptyMsg = document.getElementById('daEmptyMsg');
+  if (!dot || !statusText) return;
+
+  const STATUS_LABELS = {
+    online: 'Online',
+    idle: 'Idle',
+    dnd: 'Do Not Disturb',
+    offline: 'Offline'
+  };
+
+  // Builds a usable image URL from a Discord rich-presence asset string.
+  // Spotify assets are handled separately since Lanyard gives a direct URL.
+  function resolveAssetUrl(applicationId, assetKey) {
+    if (!assetKey) return null;
+    if (assetKey.startsWith('mp:')) {
+      return 'https://media.discordapp.net/' + assetKey.replace(/^mp:/, '');
+    }
+    return `https://cdn.discordapp.com/app-assets/${applicationId}/${assetKey}.png`;
+  }
+
+  const imgWrapEl = activityImg.parentElement;
+  activityImg.addEventListener('error', () => {
+    activityImg.removeAttribute('src');
+    imgWrapEl.hidden = true;
+  });
+
+  function showActivity({ imgUrl, name, detail, state }) {
+    if (imgUrl) {
+      activityImg.src = imgUrl;
+      activityImg.alt = name || '';
+      imgWrapEl.hidden = false;
+    } else {
+      // No usable image for this activity — clear the src so a stale or
+      // broken icon never lingers, and hide the box entirely.
+      activityImg.removeAttribute('src');
+      activityImg.alt = '';
+      imgWrapEl.hidden = true;
+    }
+    activityName.textContent = name || '';
+    activityDetail.textContent = detail || '';
+    activityDetail.hidden = !detail;
+    activityState.textContent = state || '';
+    activityState.hidden = !state;
+    activityBox.hidden = false;
+    emptyMsg.hidden = true;
+  }
+
+  function showEmpty() {
+    activityBox.hidden = true;
+    emptyMsg.hidden = false;
+  }
+
+  function render(data) {
+    const status = data.discord_status || 'offline';
+    dot.className = 'da-status-dot ' + status;
+    statusText.textContent = STATUS_LABELS[status] || 'Offline';
+
+    // Prefer Spotify (has reliable album art), then the first non-custom-status activity.
+    if (data.listening_to_spotify && data.spotify) {
+      showActivity({
+        imgUrl: data.spotify.album_art_url,
+        name: data.spotify.song,
+        detail: 'by ' + data.spotify.artist,
+        state: data.spotify.album ? 'on ' + data.spotify.album : ''
+      });
       return;
     }
 
-    if (emptyEl) emptyEl.hidden = true;
-    gridEl.innerHTML = sortDragons(filtered).map(cardHTML).join('');
+    const activity = (data.activities || []).find(a => a.type !== 4); // skip custom status (type 4)
+    if (activity) {
+      const assets = activity.assets || {};
+      const imgUrl = resolveAssetUrl(activity.application_id, assets.large_image);
+      showActivity({
+        imgUrl,
+        name: activity.name,
+        detail: activity.details || '',
+        state: activity.state || ''
+      });
+      return;
+    }
+
+    // Fall back to a custom status if that's all there is.
+    const customStatus = (data.activities || []).find(a => a.type === 4);
+    if (customStatus && (customStatus.state || customStatus.emoji)) {
+      showActivity({
+        imgUrl: null,
+        name: [customStatus.emoji ? customStatus.emoji.name : '', customStatus.state].filter(Boolean).join(' ').trim(),
+        detail: '',
+        state: ''
+      });
+      return;
+    }
+
+    showEmpty();
   }
 
-  searchEl.addEventListener('input', render);
-
-  filterRow.addEventListener('click', (e) => {
-    const chip = e.target.closest('.dragons-filter-chip');
-    if (!chip) return;
-    filterRow.querySelectorAll('.dragons-filter-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    activeClass = chip.dataset.class;
-    render();
-  });
-
-  if (sortRow) {
-    sortRow.addEventListener('click', (e) => {
-      const chip = e.target.closest('.dragons-sort-chip');
-      if (!chip) return;
-      sortRow.querySelectorAll('.dragons-sort-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeSort = chip.dataset.sort;
-      render();
-    });
+  async function fetchActivity() {
+    try {
+      const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+      const json = await res.json();
+      if (json && json.success && json.data) render(json.data);
+    } catch (err) {
+      statusText.textContent = 'unavailable';
+      dot.className = 'da-status-dot offline';
+    }
   }
 
-  /* ── Random dragon spotlight ── */
-  const randomBtn      = document.getElementById('dragonsRandomBtn');
-  const spotlightBg     = document.getElementById('dragonsSpotlightBackdrop');
-  const spotlightBody   = document.getElementById('dragonsSpotlightBody');
-  const spotlightClose  = document.getElementById('dragonsSpotlightClose');
-  const spotlightAgain  = document.getElementById('dragonsSpotlightAgain');
-
-  function showRandomDragon() {
-    const pick = dragons[Math.floor(Math.random() * dragons.length)];
-    const icon = classIcon(pick.cls);
-    spotlightBody.innerHTML = `
-      <span class="dragons-spotlight-icon">${icon}</span>
-      <span class="dragons-spotlight-eyebrow">your random dragon is…</span>
-      <h3 class="dragons-spotlight-name">${pick.name}</h3>
-      <span class="dragons-spotlight-class">${pick.cls} Class</span>
-      <div class="dragons-spotlight-meta">
-        <span><b>Size</b> ${pick.size}</span>
-        <span><b>Weight</b> ${pick.weight}</span>
-        <span><b>First appearance</b> ${pick.appears}</span>
-      </div>
-      <p class="dragons-spotlight-behaviour">${pick.behaviour}</p>
-    `;
-    if (spotlightBg) spotlightBg.hidden = false;
-  }
-
-  function hideSpotlight() {
-    if (spotlightBg) spotlightBg.hidden = true;
-  }
-
-  if (randomBtn)     randomBtn.addEventListener('click', showRandomDragon);
-  if (spotlightAgain) spotlightAgain.addEventListener('click', showRandomDragon);
-  if (spotlightClose) spotlightClose.addEventListener('click', hideSpotlight);
-  if (spotlightBg) {
-    spotlightBg.addEventListener('click', (e) => {
-      if (e.target === spotlightBg) hideSpotlight();
-    });
-  }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && spotlightBg && !spotlightBg.hidden) hideSpotlight();
-  });
-
-  render();
+  fetchActivity();
+  setInterval(fetchActivity, POLL_MS);
 })();
-} catch (e) { console.error('dragon grid setup failed:', e); }
+} catch (e) { console.error('discord activity widget setup failed:', e); }
 
-});
+/* ── Minecraft skin viewer (3D, via skinview3d) ── */
+let initMcSkinViewer; // assigned below, used as the modal's onFirstOpen callback
+try {
+(function () {
+  const MC_USERNAME = 'JDKCube';
+  const canvas  = document.getElementById('mcSkinCanvas');
+  const loading = document.getElementById('mcSkinLoading');
+  if (!canvas) return;
+
+  let viewer = null;
+
+  initMcSkinViewer = function () {
+    if (viewer || typeof skinview3d === 'undefined') {
+      if (typeof skinview3d === 'undefined') {
+        if (loading) loading.textContent = 'couldn\'t load 3d viewer';
+      }
+      return;
+    }
+
+    const wrap = canvas.parentElement;
+    const size = wrap ? Math.min(wrap.clientWidth, wrap.clientHeight || wrap.clientWidth) : 280;
+
+    try {
+      viewer = new skinview3d.SkinViewer({
+        canvas: canvas,
+        width: size,
+        height: size,
+        skin: `https://mc-heads.net/skin/${MC_USERNAME}`
+      });
+
+      viewer.autoRotate = true;
+      viewer.autoRotateSpeed = 0.8;
+      viewer.controls.enableZoom = true;
+      viewer.zoom = 0.85;
+
+      // walking animation so it doesn't look frozen
+      if (skinview3d.WalkingAnimation) {
+        viewer.animation = new skinview3d.WalkingAnimation();
+        viewer.animation.speed = 0.6;
+      }
+
+      viewer.loadSkin(`https://mc-heads.net/skin/${MC_USERNAME}`)
+        .then(() => { if (loading) loading.hidden = true; })
+        .catch(() => { if (loading) loading.textContent = 'could not load skin'; });
+    } catch (err) {
+      console.error('skin viewer init failed:', err);
+      if (loading) loading.textContent = 'could not load 3d viewer';
+    }
+  };
+
+  // Keep the canvas crisp if the modal/tile is resized.
+  window.addEventListener('resize', () => {
+    if (!viewer) return;
+    const wrap = canvas.parentElement;
+    const size = wrap ? Math.min(wrap.clientWidth, wrap.clientHeight || wrap.clientWidth) : 280;
+    viewer.setSize(size, size);
+  });
+})();
+} catch (e) { console.error('minecraft skin viewer setup failed:', e); }
+
+/* ── Click counter tile ── */
+try {
+(function () {
+  const btn = document.getElementById('clickCounter');
+  const valueEl = document.getElementById('counterValue');
+  if (!btn || !valueEl) return;
+
+  const STORAGE_KEY = 'jdkcube-clickcount';
+  let count = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+  if (!Number.isFinite(count) || count < 0) count = 0;
+  valueEl.textContent = count.toLocaleString();
+
+  btn.addEventListener('click', () => {
+    count += 1;
+    valueEl.textContent = count.toLocaleString();
+    localStorage.setItem(STORAGE_KEY, String(count));
+
+    valueEl.classList.remove('bump');
+    // force reflow so the animation can restart on rapid clicks
+    void valueEl.offsetWidth;
+    valueEl.classList.add('bump');
+  });
+})();
+} catch (e) { console.error('click counter setup failed:', e); }
+
+/* ── Mini paint tile ── */
+try {
+(function () {
+  const canvas = document.getElementById('paintCanvas');
+  const wrap = document.getElementById('paintCanvasWrap');
+  if (!canvas || !wrap) return;
+
+  const ctx = canvas.getContext('2d');
+  const clearBtn = document.getElementById('paintClear');
+  const sizeSlider = document.getElementById('paintSize');
+  const strengthSlider = document.getElementById('paintStrength');
+  const colorPicker = document.getElementById('paintColorPicker');
+  const swatches = document.querySelectorAll('.paint-swatch');
+
+  let currentColor = '#00e5ff';
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  function resizeCanvas() {
+    const ratio = window.devicePixelRatio || 1;
+    const w = wrap.clientWidth;
+    const h = wrap.clientHeight;
+    if (w === 0 || h === 0) return;
+    canvas.width = w * ratio;
+    canvas.height = h * ratio;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  // wait a tick so layout/fonts have settled before measuring the wrapper
+  requestAnimationFrame(resizeCanvas);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resizeCanvas, 150);
+  });
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const point = e.touches && e.touches.length ? e.touches[0] : e;
+    return {
+      x: point.clientX - rect.left,
+      y: point.clientY - rect.top
+    };
+  }
+
+  function drawLine(x1, y1, x2, y2) {
+    const size = parseFloat(sizeSlider.value) || 6;
+    const strength = (parseFloat(strengthSlider.value) || 100) / 100;
+    ctx.strokeStyle = currentColor;
+    ctx.globalAlpha = strength;
+    ctx.lineWidth = size;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  function startDraw(e) {
+    drawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    drawLine(pos.x, pos.y, pos.x, pos.y); // dot for a single click/tap
+    e.preventDefault();
+  }
+
+  function moveDraw(e) {
+    if (!drawing) return;
+    const pos = getPos(e);
+    drawLine(lastX, lastY, pos.x, pos.y);
+    lastX = pos.x;
+    lastY = pos.y;
+    e.preventDefault();
+  }
+
+  function endDraw() {
+    drawing = false;
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  window.addEventListener('mouseup', endDraw);
+
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', moveDraw, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+  canvas.addEventListener('touchcancel', endDraw);
+
+  function setActiveSwatch(btn) {
+    swatches.forEach(s => s.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  swatches.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentColor = btn.dataset.color;
+      if (colorPicker) colorPicker.value = currentColor;
+      setActiveSwatch(btn);
+    });
+  });
+
+  if (colorPicker) {
+    colorPicker.addEventListener('input', () => {
+      currentColor = colorPicker.value;
+      setActiveSwatch(null);
+    });
+  }
+
+  function bindSliderFill(slider) {
+    if (!slider) return;
+    const update = () => {
+      const min = parseFloat(slider.min) || 0;
+      const max = parseFloat(slider.max) || 100;
+      const pct = ((slider.value - min) / (max - min)) * 100;
+      slider.style.setProperty('--val', pct + '%');
+    };
+    update();
+    slider.addEventListener('input', update);
+  }
+  bindSliderFill(sizeSlider);
+  bindSliderFill(strengthSlider);
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  }
+})();
+} catch (e) { console.error('paint tile setup failed:', e); }
+
+}); // end DOMContentLoaded
