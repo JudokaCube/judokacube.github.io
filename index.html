@@ -161,15 +161,15 @@
             <p>the site you are looking at rn.</p>
           </div>
 
-          <div class="project-card">
+          <button class="project-card project-card-clickable" id="openSkye" aria-haspopup="dialog">
             <div class="project-top">
               <span class="project-tag">discord bot</span>
               <div class="project-dot"></div>
             </div>
             <h3>Skye</h3>
-            <p>a discord utility bot written in python using discord.py</p>
-            <a href="#" class="project-link">coming soon ↗</a>
-          </div>
+            <p>a discord utility bot written in python using discord.py with over 60 commands</p>
+            <span class="project-link">VIEW ↗</span>
+          </button>
 
           <div class="project-card">
             <div class="project-top">
@@ -590,6 +590,38 @@
         </div>
 
         <div class="book-list" id="bookList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ SKYE COMMANDS MODAL ░░ -->
+  <div class="modal-overlay" id="skyeModal" role="dialog" aria-modal="true" aria-label="Skye command list">
+    <div class="modal-box book-modal-box">
+      <button class="modal-close" id="closeSkye" aria-label="Close skye command list">✕</button>
+
+      <div class="book-modal-card">
+        <div class="book-modal-label">// skye commands</div>
+        <h2 class="book-modal-title">Skye Command List</h2>
+        <p class="book-modal-sub">Every command Skye has, grouped by category, with aliases and a short explanation. Default prefix is <code>.</code></p>
+
+        <div class="skye-disclaimer">
+          ⚠️ Skye is actively in development and doesn't have proper hosting yet, so <b>uptime is low</b> — it may be offline outside of testing sessions.
+        </div>
+
+        <div class="book-search-row">
+          <span class="book-search-icon">🔍</span>
+          <input
+            type="text"
+            id="skyeSearch"
+            class="book-search-input"
+            placeholder="search a command, alias or category…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <span class="book-search-count" id="skyeCount"></span>
+        </div>
+
+        <div class="book-list" id="skyeList"></div>
       </div>
     </div>
   </div>
