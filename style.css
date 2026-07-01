@@ -1056,6 +1056,8 @@ html, body.dashboard-body {
   width: 100%;
   font: inherit;
   color: inherit;
+  text-decoration: none;
+  cursor: pointer;
 }
 .project-card-clickable:active {
   transform: translateY(-1px) scale(0.99);
@@ -1352,6 +1354,38 @@ html, body.dashboard-body {
   height: 13px;
   object-fit: contain;
   filter: drop-shadow(0 0 3px rgba(0, 229, 255, 0.4));
+}
+
+.footer-social {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  transition: color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+.footer-social-link:hover {
+  color: var(--cyan);
+  border-color: var(--border-cyan);
+  box-shadow: 0 0 10px var(--cyan-glow2);
+  transform: translateY(-2px);
+}
+.footer-social-link:active {
+  transform: translateY(0) scale(0.94);
+}
+.footer-social-link svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* ============================================
@@ -2945,4 +2979,110 @@ body.modal-open .easter-egg {
   }
   .boot-logo-path { stroke-dashoffset: 0; }
   .boot-progress-fill { width: 100%; }
+}
+/* ============================================
+   MOBILE LAYOUT
+   below this width, trying to cram every tile
+   into one no-scroll screen just squishes
+   everything unreadably. instead: give up the
+   single-viewport trick, let the page scroll,
+   and stack the dashboard into one clean column.
+   ============================================ */
+@media (max-width: 700px) {
+  html, body.dashboard-body {
+    height: auto;
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .dashboard {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+    justify-content: flex-start;
+    padding: 1.2rem 1.1rem 2.2rem;
+    gap: 1.1rem;
+  }
+
+  .dash-hero { padding-top: 0.2rem; }
+  .dash-desc { display: block; }
+
+  /* tile grid: one clean column instead of a squeezed 2x2 grid */
+  .tile-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .tile-col-book,
+  .tile-col-about {
+    gap: 0.8rem;
+  }
+  .tile-book-launch,
+  .tile-mc-launch,
+  .tile-about-launch,
+  .tile-discord-activity,
+  .tile-terminal-launch,
+  .tile-discord-launch {
+    flex: none;
+  }
+  .tile-launch {
+    min-height: 66px;
+  }
+
+  .tile-projects {
+    padding: 1rem;
+  }
+  .tile-projects .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .tile-projects .project-card {
+    padding: 0.8rem 0.9rem;
+  }
+  .tile-projects .project-card p {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    display: block;
+    overflow: visible;
+  }
+
+  /* decoration tiles: one per row with real, usable heights
+     instead of being squashed into a tiny aspect-ratio grid */
+  .decor-grid {
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: auto;
+    flex: none;
+    gap: 0.8rem;
+  }
+  .tile-decor-fastfetch,
+  .tile-decor-paint,
+  .tile-decor-counter,
+  .tile-decor-cube,
+  .tile-decor-image {
+    grid-column: auto;
+    width: 100%;
+  }
+  .tile-decor-fastfetch { height: 190px; }
+  .tile-decor-paint     { height: 300px; }
+  .tile-decor-counter   { height: 110px; }
+  .tile-decor-cube      { height: 140px; }
+  .tile-decor-image     { height: 170px; }
+
+  .paint-swatch-row { flex-wrap: wrap; }
+  .paint-controls { row-gap: 0.5rem; }
+
+  /* footer: wrap and center so the new social icons have room */
+  .dash-footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.7rem;
+    text-align: center;
+  }
+
+  /* the floating easter-egg bubble sits fixed over scrolling
+     content on mobile and starts overlapping cards/footer, so
+     it stays hidden below 700px just like it already was <460px */
+  .easter-egg { display: none; }
 }
