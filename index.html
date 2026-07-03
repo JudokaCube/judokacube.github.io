@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Book of Dragons</title>
-  <meta name="description" content="most if not all species from httyd organised by classes" />
+  <title>JDKCube</title>
+  <meta name="description" content="my own personal site :D" />
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1" />
+  <link rel="stylesheet" href="style.css?v=6" />
   <script>
     (function () {
       var saved = localStorage.getItem('jdkcube-theme');
@@ -17,80 +17,635 @@
     })();
   </script>
 </head>
-<body class="dragons-body">
+<body class="dashboard-body">
 
-  <div class="dragons-bg-grid"></div>
-  <div class="dragons-glow"></div>
+  <!-- ░░ BOOT SEQUENCE ░░ -->
+  <div class="boot-screen" id="bootScreen" aria-hidden="true">
+    <div class="boot-grid"></div>
+    <div class="boot-glow"></div>
 
-  <a class="dragons-back" href="https://judokacube.github.io">← main site</a>
+    <div class="boot-stack">
+      <div class="boot-emblem">
+        <span class="boot-ring boot-ring-a"></span>
+        <span class="boot-ring boot-ring-b"></span>
+        <svg class="boot-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path class="boot-logo-path boot-logo-path-1" d="M50 16 L82 34 L82 70 L50 88 L18 70 L18 34 Z" stroke-linejoin="round" stroke-linecap="round"/>
+          <path class="boot-logo-path boot-logo-path-2" d="M50 52 L50 16 M50 52 L18 70 M50 52 L82 70" stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
+      </div>
 
+      <div class="boot-wordmark">
+        <span class="boot-wordmark-main">JDKCUBE</span>
+        <span class="boot-wordmark-sub">jdkcube@arch</span>
+      </div>
+
+      <div class="boot-progress-track">
+        <div class="boot-progress-fill"></div>
+      </div>
+
+      <div class="boot-stage-wrap">
+        <span class="boot-stage" style="--i:0">spinning up the kernel</span>
+        <span class="boot-stage" style="--i:1">mounting filesystems</span>
+        <span class="boot-stage" style="--i:2">waking the daemons</span>
+        <span class="boot-stage" style="--i:3">welcome back</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var boot = document.getElementById('bootScreen');
+      if (!boot) return;
+      var DURATION = 2400;
+      window.setTimeout(function () {
+        boot.classList.add('boot-done');
+        window.setTimeout(function () {
+          if (boot.parentNode) boot.parentNode.removeChild(boot);
+        }, 650);
+      }, DURATION);
+    })();
+  </script>
+
+  <div class="dash-bg-grid"></div>
+  <div class="dash-glow"></div>
+  <div class="dash-glow-2"></div>
+
+  <!-- ░░ DASHBOARD ░░ -->
+  <main class="dashboard">
+
+    <!-- compact hero -->
+    <header class="dash-hero fade-in">
+      <span class="dash-eyebrow">hey, i'm</span>
+      <h1 class="dash-title">JDKCube</h1>
+      <p class="dash-desc">httyd · hollow knight · scuba · linux · games</p>
+    </header>
+
+    <!-- tile grid -->
+    <div class="tile-grid">
+
+      <div class="tile-col-book">
+        <!-- BOOK OF DRAGONS LAUNCH TILE -->
+        <a class="tile tile-launch tile-book-launch" href="https://judokacube.github.io/bookofdragons/">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-launch-icon tile-book-icon"><img src="assets/dragon-logo.png" alt="" /></div>
+          <div class="tile-launch-text">
+            <h3>Book of Dragons</h3>
+          </div>
+          <span class="tile-launch-arrow">↗</span>
+        </a>
+
+        <!-- MINECRAFT SKIN LAUNCH TILE -->
+        <button class="tile tile-launch tile-mc-launch" id="openMcSkin" aria-haspopup="dialog">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-launch-icon">🧊</div>
+          <div class="tile-launch-text">
+            <h3>Minecraft</h3>
+          </div>
+          <span class="tile-launch-arrow">↗</span>
+        </button>
+      </div>
+
+      <div class="tile-col-about">
+        <!-- ABOUT LAUNCH TILE -->
+        <button class="tile tile-launch tile-about-launch" id="openAbout" aria-haspopup="dialog">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-launch-icon">🐉</div>
+          <div class="tile-launch-text">
+            <h3>About Me</h3>
+            <p>httyd, hollow knight and more.</p>
+          </div>
+          <span class="tile-launch-arrow">↗</span>
+        </button>
+
+        <!-- DISCORD ACTIVITY TILE (live via Lanyard) -->
+        <section class="tile tile-discord-activity" id="discordActivityTile" aria-label="Live Discord activity">
+          <div class="tile-spotlight" aria-hidden="true"></div>
+          <div class="tile-head">
+            <span class="tile-label">// now on discord</span>
+          </div>
+
+          <div class="da-status-row">
+            <span class="da-status-dot" id="daStatusDot"></span>
+            <span class="da-status-text" id="daStatusText">connecting…</span>
+          </div>
+
+          <div class="da-activity" id="daActivity" hidden>
+            <div class="da-activity-img-wrap">
+              <img class="da-activity-img" id="daActivityImg" src="" alt="" />
+            </div>
+            <div class="da-activity-text">
+              <p class="da-activity-name" id="daActivityName"></p>
+              <p class="da-activity-detail" id="daActivityDetail"></p>
+              <p class="da-activity-state" id="daActivityState"></p>
+            </div>
+          </div>
+
+          <p class="da-empty-msg" id="daEmptyMsg" hidden>not doing anything in particular right now</p>
+        </section>
+      </div>
+
+      <!-- PROJECTS TILE -->
+      <section class="tile tile-projects">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-head">
+          <span class="tile-label">// projects</span>
+        </div>
+        <div class="projects-grid">
+
+          <div class="project-card">
+            <div class="project-top">
+              <span class="project-tag">website</span>
+              <div class="project-dot"></div>
+            </div>
+            <h3>JDKCube site</h3>
+            <p>the site you are looking at rn.</p>
+          </div>
+
+          <a href="https://judokacube.github.io/skye" class="project-card project-card-clickable">
+            <div class="project-top">
+              <span class="project-tag">discord bot</span>
+              <div class="project-dot"></div>
+            </div>
+            <h3>Skye</h3>
+            <p>a discord utility bot written in python using discord.py with over 60 commands</p>
+            <span class="project-link">VIEW ↗</span>
+          </a>
+
+          <a href="https://losangtsugtor.com" target="_blank" rel="noopener noreferrer" class="project-card project-card-clickable">
+            <div class="project-top">
+              <span class="project-tag">web</span>
+              <div class="project-dot"></div>
+            </div>
+            <h3>losangtsugtor.com</h3>
+            <p>a website i made for a very talented book author.</p>
+            <span class="project-link">visit ↗</span>
+          </a>
+
+          <a href="https://anakreativa.com" target="_blank" rel="noopener noreferrer" class="project-card project-card-clickable">
+            <div class="project-top">
+              <span class="project-tag">web</span>
+              <div class="project-dot"></div>
+            </div>
+            <h3>anakreativa.com</h3>
+            <p>another website i made but for a very talented artist.</p>
+            <span class="project-link">visit ↗</span>
+          </a>
+
+        </div>
+
+        <p class="projects-more">and more on my <a href="https://github.com/JudokaCube" target="_blank" rel="noopener noreferrer" class="projects-more-link">github</a></p>
+      </section>
+
+      <!-- TERMINAL LAUNCH TILE -->
+      <button class="tile tile-launch tile-terminal-launch" id="openTerminal" aria-haspopup="dialog">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-launch-icon">&gt;_</div>
+        <div class="tile-launch-text">
+          <h3>Python Terminal</h3>
+          <p>live python in your browser</p>
+        </div>
+        <span class="tile-launch-arrow">↗</span>
+      </button>
+
+      <!-- DISCORD LAUNCH TILE -->
+      <button class="tile tile-launch tile-discord-launch" id="openDiscord" aria-haspopup="dialog">
+        <div class="tile-spotlight" aria-hidden="true"></div>
+        <div class="tile-launch-avatar">
+          <img src="assets/pfp.jpg" alt="" />
+          <span class="tile-launch-dot"></span>
+        </div>
+        <div class="tile-launch-text">
+          <h3>Discord</h3>
+          <p>@judokacube</p>
+        </div>
+        <span class="tile-launch-arrow">↗</span>
+      </button>
+
+    </div>
+
+    <!-- decoration tiles -->
+    <div class="decor-grid">
+
+      <!-- riced arch linux fastfetch — click for full pc specs -->
+      <button class="tile tile-decor tile-decor-fastfetch" id="openSpecs" aria-haspopup="dialog" aria-label="View PC specs">
+        <div class="ff-window">
+          <div class="ff-titlebar">
+            <div class="term-dots">
+              <span class="term-dot red"></span>
+              <span class="term-dot yellow"></span>
+              <span class="term-dot green"></span>
+            </div>
+            <span class="ff-titletext">jdkcube@arch: ~</span>
+          </div>
+          <div class="ff-body">
+            <pre class="ff-ascii"><span class="ff-l1">                 .o+`</span>
+<span class="ff-l2">                `ooo/</span>
+<span class="ff-l3">               `+oooo:</span>
+<span class="ff-l4">              `+oooooo:</span>
+<span class="ff-l5">              -+oooooo+:</span>
+<span class="ff-l6">            `/:-:++oooo+:</span>
+<span class="ff-l7">           `/++++/+++++++:</span>
+<span class="ff-l8">          `/++++++++++++++:</span>
+<span class="ff-l9">         `/+++ooooooooooooo/`</span>
+<span class="ff-l10">        ./ooosssso++osssssso+`</span>
+<span class="ff-l11">       .oossssso-````/ossssss+`</span>
+<span class="ff-l12">      -osssssso.      :ssssssso.</span>
+<span class="ff-l13">     :osssssss/        osssso+++.</span>
+<span class="ff-l14">    /ossssssss/        +ssssooo/-</span>
+<span class="ff-l15">  `/ossssso+/:-        -:/+osssso+-</span>
+<span class="ff-l16"> `+sso+:-`                 `.-/+oso:</span></pre>
+            <div class="ff-info">
+              <p class="ff-userhost"><span class="ff-user">jdkcube</span><span class="ff-at">@</span><span class="ff-host">arch</span></p>
+              <p class="ff-rule">-----------------</p>
+              <p><span class="ff-key">OS</span><span class="ff-val">Arch Linux x86_64</span></p>
+              <p><span class="ff-key">Kernel</span><span class="ff-val">Linux 6.9.3-arch1-1</span></p>
+              <p><span class="ff-key">Uptime</span><span class="ff-val">2 hours, 14 mins</span></p>
+              <p><span class="ff-key">Shell</span><span class="ff-val">zsh 5.9</span></p>
+              <p><span class="ff-key">WM</span><span class="ff-val">Hyprland</span></p>
+              <p><span class="ff-key">Terminal</span><span class="ff-val">kitty<span class="ff-cursor">▌</span></span></p>
+              <div class="ff-swatches">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="tile-launch-arrow ff-arrow">↗</span>
+      </button>
+
+      <!-- MINI PAINT TILE — stylized canvas with color / brush size / strength controls -->
+      <div class="tile tile-decor tile-decor-paint" aria-label="Mini paint canvas">
+        <div class="paint-head">
+          <span class="tile-label">// paint</span>
+          <button class="paint-clear-btn" id="paintClear" type="button">clear</button>
+        </div>
+
+        <div class="paint-canvas-wrap" id="paintCanvasWrap">
+          <canvas id="paintCanvas" class="paint-canvas"></canvas>
+        </div>
+
+        <div class="paint-controls">
+          <div class="paint-control-group paint-colors">
+            <span class="paint-control-label">color</span>
+            <div class="paint-swatch-row">
+              <button class="paint-swatch active" style="--swatch-color:#00e5ff" data-color="#00e5ff" aria-label="cyan"></button>
+              <button class="paint-swatch" style="--swatch-color:#ffffff" data-color="#ffffff" aria-label="white"></button>
+              <button class="paint-swatch" style="--swatch-color:#ff5d8f" data-color="#ff5d8f" aria-label="pink"></button>
+              <button class="paint-swatch" style="--swatch-color:#ffd166" data-color="#ffd166" aria-label="yellow"></button>
+              <button class="paint-swatch" style="--swatch-color:#6effa3" data-color="#6effa3" aria-label="green"></button>
+              <input type="color" id="paintColorPicker" class="paint-color-picker" value="#00e5ff" aria-label="custom color" />
+            </div>
+          </div>
+
+          <div class="paint-control-group">
+            <span class="paint-control-label">size</span>
+            <input type="range" id="paintSize" class="paint-slider" min="1" max="40" value="6" aria-label="brush size" />
+          </div>
+
+          <div class="paint-control-group">
+            <span class="paint-control-label">strength</span>
+            <input type="range" id="paintStrength" class="paint-slider" min="10" max="100" value="100" aria-label="brush strength" />
+          </div>
+        </div>
+      </div>
+
+      <!-- CLICK COUNTER TILE — pure fun, increments per click, persists locally -->
+      <button class="tile tile-decor tile-decor-counter" id="clickCounter" aria-label="Click counter, click to add one">
+        <span class="counter-label">// clicks</span>
+        <span class="counter-value" id="counterValue">0</span>
+        <span class="counter-hint">click me</span>
+      </button>
+
+      <!-- pure-CSS rotating wireframe cube, cyan lines, no fill -->
+      <div class="tile tile-decor tile-decor-cube" aria-hidden="true">
+        <div class="cube-scene">
+          <div class="cube">
+            <div class="cube-face front"></div>
+            <div class="cube-face back"></div>
+            <div class="cube-face right"></div>
+            <div class="cube-face left"></div>
+            <div class="cube-face top"></div>
+            <div class="cube-face bottom"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- themed image tile — assets/underwater.png -->
+      <div class="tile tile-decor tile-decor-image" style="--decor-img: url('assets/underwater.png')" aria-hidden="true"></div>
+
+    </div>
+
+    <!-- footer -->
+    <footer class="dash-footer">
+      <span class="footer-logo">JDKCube</span>
+
+      <div class="footer-social">
+        <a href="https://github.com/JudokaCube" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="GitHub profile">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.73.5.9 5.33.9 11.6c0 5.02 3.26 9.28 7.78 10.78.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.1-3.17.69-3.84-1.34-3.84-1.34-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.53-2.53-.29-5.19-1.27-5.19-5.63 0-1.24.44-2.26 1.17-3.06-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.57.23 2.73.11 3.02.73.8 1.17 1.82 1.17 3.06 0 4.37-2.67 5.34-5.21 5.62.41.36.77 1.06.77 2.14 0 1.55-.01 2.79-.01 3.17 0 .3.2.66.79.55A11.11 11.11 0 0 0 23.1 11.6C23.1 5.33 18.27.5 12 .5Z"/>
+          </svg>
+        </a>
+        <a href="https://open.spotify.com/user/6lrz9s4gpj2gc4vbd2uj8v9gb?si=17100e018c9c4391" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="Spotify profile">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.65.5.5 5.65.5 12S5.65 23.5 12 23.5 23.5 18.35 23.5 12 18.35.5 12 .5Zm5.02 16.24a.75.75 0 0 1-1.03.26c-2.82-1.72-6.37-2.11-10.55-1.16a.75.75 0 1 1-.33-1.46c4.58-1.04 8.5-.59 11.65 1.33.36.22.47.68.26 1.03Zm1.34-3.06a.94.94 0 0 1-1.29.31c-3.23-1.99-8.15-2.56-11.97-1.4a.94.94 0 1 1-.55-1.8c4.36-1.32 9.79-.68 13.5 1.6.44.27.58.85.31 1.29Zm.12-3.19c-3.87-2.3-10.26-2.51-13.96-1.39a1.13 1.13 0 1 1-.66-2.16c4.24-1.29 11.29-1.04 15.75 1.6a1.13 1.13 0 1 1-1.13 1.95Z"/>
+          </svg>
+        </a>
+      </div>
+
+      <span class="footer-copy">
+        <img src="assets/favicon.ico" alt="" class="footer-favicon" aria-hidden="true" />
+        hello :D
+      </span>
+    </footer>
+
+  </main>
+
+  <!-- ░░ TERMINAL MODAL ░░ -->
+  <div class="modal-overlay" id="terminalModal" role="dialog" aria-modal="true" aria-label="Python terminal">
+    <div class="modal-box term-modal-box">
+      <button class="modal-close" id="closeTerminal" aria-label="Close terminal">✕</button>
+
+      <div class="term-window">
+        <div class="term-titlebar">
+          <div class="term-dots">
+            <span class="term-dot red"></span>
+            <span class="term-dot yellow"></span>
+            <span class="term-dot green"></span>
+          </div>
+          <span class="term-title">python3 — jdkcube</span>
+          <span class="term-status" id="termStatus">loading…</span>
+        </div>
+
+        <div class="term-body" id="termBody">
+          <pre class="term-output" id="termOutput"></pre>
+          <div class="term-input-row">
+            <span class="term-prompt">&gt;&gt;&gt;</span>
+            <input
+              type="text"
+              class="term-input"
+              id="termInput"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="loading python runtime…"
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+      <p class="term-hint">↑ / ↓ for history · type <code>clear</code> to reset · <code>help()</code> works too</p>
+    </div>
+  </div>
+
+  <!-- ░░ DISCORD MODAL ░░ -->
+  <div class="modal-overlay" id="discordModal" role="dialog" aria-modal="true" aria-label="Discord profile">
+    <div class="modal-box dc-modal-box">
+      <button class="modal-close" id="closeDiscord" aria-label="Close discord profile">✕</button>
+
+      <div class="dc-card">
+
+        <div class="dc-banner">
+          <img class="dc-banner-img" src="assets/banner.jpg" alt="" aria-hidden="true" />
+        </div>
+
+        <div class="dc-avatar-row">
+          <div class="dc-avatar-wrap">
+            <div class="dc-avatar">
+              <img src="assets/pfp.jpg" alt="JDKCube avatar" class="dc-avatar-img" />
+            </div>
+            <span class="dc-status-dot dnd" title="Do Not Disturb"></span>
+          </div>
+          <div class="dc-badges"></div>
+        </div>
+
+        <div class="dc-body">
+
+          <div class="dc-names">
+            <span class="dc-display-name">JDKCube</span>
+            <span class="dc-username">judokacube</span>
+          </div>
+
+          <div class="dc-pronouns">he/him/lazy</div>
+
+          <div class="dc-custom-status">
+            <span class="dc-status-emoji">🤍</span>
+            <span class="dc-status-text">httyd | hk 109% PoP</span>
+          </div>
+
+          <div class="dc-divider"></div>
+
+          <div class="dc-about-label">ABOUT ME</div>
+          <div class="dc-bio">
+            <p>Not much to say, i like games, hollow knight and i like httyd. I also scuba dive ➴ jdkcube.net</p>
+            <p>rory, king 🤍</p>
+            <p>triple stryke best dragon oat</p>
+          </div>
+
+          <div class="dc-divider"></div>
+
+          <div class="dc-meta-label">MEMBER SINCE</div>
+          <div class="dc-meta-row">
+            <span class="dc-meta-value">2021</span>
+          </div>
+
+          <div class="dc-user-id-row">
+            <span class="dc-meta-label-inline">USER ID</span>
+            <span class="dc-user-id">820292272209002526</span>
+          </div>
+
+          <button class="dc-copy-btn" id="copyBtn" aria-label="Copy username to clipboard">
+            <span class="dc-copy-label">Copy Username</span>
+            <span class="dc-copy-tick" aria-hidden="true">✓ Copied!</span>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ ABOUT MODAL ░░ -->
+  <div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-label="About me">
+    <div class="modal-box about-modal-box">
+      <button class="modal-close" id="closeAbout" aria-label="Close about me">✕</button>
+
+      <div class="about-modal-card">
+        <div class="about-modal-label">// about</div>
+        <h2 class="about-modal-title">a bit about me</h2>
+
+        <div class="interests-list">
+
+          <div class="interest-row">
+            <span class="interest-icon">🐉</span>
+            <div class="interest-body">
+              <h3>How to Train Your Dragon</h3>
+              <p>triple stryke, death song, storm cutter and speed stingers are the best dragons oat</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">🐛</span>
+            <div class="interest-body">
+              <h3>Hollow Knight</h3>
+              <p>109% game completion and path of pain done, dont ask how long this took</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">🤿</span>
+            <div class="interest-body">
+              <h3>Scuba diving</h3>
+              <p>love scuba so much, and the animals are amazing</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">⛏️</span>
+            <div class="interest-body">
+              <h3>Minecraft</h3>
+              <p>been playing since 1.16 will never get tired of it</p>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <span class="interest-icon">🐧</span>
+            <div class="interest-body">
+              <h3>Linux</h3>
+              <p>i use arch btw :)</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ SPECS MODAL ░░ -->
+  <div class="modal-overlay" id="specsModal" role="dialog" aria-modal="true" aria-label="PC specs">
+    <div class="modal-box specs-modal-box">
+      <button class="modal-close" id="closeSpecs" aria-label="Close pc specs">✕</button>
+
+      <div class="specs-card">
+        <div class="specs-card-label">// specs</div>
+        <h2 class="specs-card-title">my specs</h2>
+
+        <div class="ff-window specs-window">
+          <div class="ff-titlebar">
+            <div class="term-dots">
+              <span class="term-dot red"></span>
+              <span class="term-dot yellow"></span>
+              <span class="term-dot green"></span>
+            </div>
+            <span class="ff-titletext">jdkcube@arch: ~</span>
+          </div>
+          <div class="ff-body specs-body">
+            <pre class="ff-ascii">                 .o+`
+                `ooo/
+               `+oooo:
+              `+oooooo:
+              -+oooooo+:
+            `/:-:++oooo+:
+           `/++++/+++++++:
+          `/++++++++++++++:
+         `/+++ooooooooooooo/`
+        ./ooosssso++osssssso+`
+       .oossssso-````/ossssss+`
+      -osssssso.      :ssssssso.
+     :osssssss/        osssso+++.
+    /ossssssss/        +ssssooo/-
+  `/ossssso+/:-        -:/+osssso+-
+ `+sso+:-`                 `.-/+oso:
+`++:.                           `-/+/
+ .`                                 `/</pre>
+            <div class="ff-info">
+              <p class="ff-userhost"><span class="ff-user">jdkcube</span><span class="ff-at">@</span><span class="ff-host">arch</span></p>
+              <p class="ff-rule">-----------------</p>
+              <p class="ff-row"><span class="ff-key">OS</span><span class="ff-val">Arch Linux x86_64</span></p>
+              <p class="ff-row"><span class="ff-key">Kernel</span><span class="ff-val">Linux 6.9.3-arch1-1</span></p>
+              <p class="ff-row"><span class="ff-key">Shell</span><span class="ff-val">zsh 5.9</span></p>
+              <p class="ff-row"><span class="ff-key">WM</span><span class="ff-val">Hyprland</span></p>
+              <p class="ff-rule">-----------------</p>
+              <p class="ff-row"><span class="ff-key">CPU</span><span class="ff-val">AMD Ryzen 5 7600</span></p>
+              <p class="ff-row"><span class="ff-key">GPU</span><span class="ff-val">AMD Radeon RX 7800 XT</span></p>
+              <p class="ff-row"><span class="ff-key">Memory</span><span class="ff-val">32GB DDR5</span></p>
+              <p class="ff-row"><span class="ff-key">Disk</span><span class="ff-val">2x 2TB SSD</span></p>
+              <p class="ff-row"><span class="ff-key">Disk</span><span class="ff-val">2x 2TB HDD</span></p>
+              <p class="ff-row"><span class="ff-key">Keyboard</span><span class="ff-val">NewSkill Pyros V2</span></p>
+              <p class="ff-row"><span class="ff-key">Mouse</span><span class="ff-val">ATK X1<span class="ff-cursor">▌</span></span></p>
+              <div class="ff-swatches">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ MINECRAFT SKIN MODAL ░░ -->
+  <div class="modal-overlay" id="mcSkinModal" role="dialog" aria-modal="true" aria-label="Minecraft skin viewer">
+    <div class="modal-box mc-modal-box">
+      <button class="modal-close" id="closeMcSkin" aria-label="Close minecraft skin viewer">✕</button>
+
+      <div class="mc-skin-card">
+        <div class="mc-skin-label">// minecraft</div>
+        <h2 class="mc-skin-title">JDKCube</h2>
+
+        <div class="mc-skin-canvas-wrap" id="mcSkinCanvasWrap">
+          <canvas id="mcSkinCanvas"></canvas>
+        </div>
+
+        <p class="mc-skin-hint">drag to rotate · scroll to zoom</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ MUSIC PLAYER ░░ -->
+  <audio id="bgMusic" src="assets/music.mp3" loop preload="auto"></audio>
+
+  <div class="music-widget" id="musicWidget" aria-label="Background music controls">
+    <button class="music-btn" id="musicBtn" aria-label="Toggle music / show volume">
+      <span class="music-icon">♪</span>
+    </button>
+    <div class="music-panel" id="musicPanel" role="tooltip">
+      <div class="music-controls-row">
+        <button class="music-pause-btn" id="musicPauseBtn" aria-label="Pause music">
+          <svg class="icon-pause" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+            <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+          </svg>
+          <svg class="icon-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path d="M7 4.5v15l13-7.5z" fill="currentColor"/>
+          </svg>
+        </button>
+        <input
+          type="range"
+          class="music-slider"
+          id="volumeSlider"
+          min="0"
+          max="100"
+          value="40"
+          aria-label="Volume"
+        />
+      </div>
+      <p class="music-label">Romantic Flight<br /><span>From How to Train Your Dragon · John Powell</span></p>
+    </div>
+  </div>
+
+  <!-- ░░ THEME TOGGLE ░░ -->
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle light / dark mode">
     <span class="theme-icon theme-icon-moon">🌙</span>
     <span class="theme-icon theme-icon-sun">☀️</span>
   </button>
 
-  <main class="dragons-page">
+  <!-- ░░ EASTER EGG ░░ -->
+  <a class="easter-egg" id="easterEgg" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" aria-label="click me!">
+    <div class="easter-egg-bubble">click me!</div>
+    <img src="assets/pfp.jpg" alt="" class="easter-egg-img" />
+  </a>
 
-    <header class="dragons-hero fade-in">
-      <img class="dragons-logo" src="assets/dragon-logo.png" alt="Book of Dragons logo" />
-      <span class="dragons-eyebrow">a collection of httyd species</span>
-      <h1 class="dragons-title">Book of Dragons</h1>
-      <p class="dragons-desc">most if not all species from httyd organised by classes</p>
-    </header>
-
-    <!-- ░░ SEARCH + FILTER BAR ░░ -->
-    <div class="dragons-toolbar fade-in">
-      <div class="dragons-search-row">
-        <span class="dragons-search-icon">🔍</span>
-        <input
-          type="text"
-          id="dragonsSearch"
-          class="dragons-search-input"
-          placeholder="search a dragon, class, or where it appears…"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <span class="dragons-search-count" id="dragonsCount"></span>
-        <button class="dragons-random-btn" id="dragonsRandomBtn" type="button" title="Show me a random dragon">
-          <span class="dragons-random-icon">🎲</span> Random
-        </button>
-      </div>
-
-      <div class="dragons-filter-row" id="dragonsFilterRow">
-        <button class="dragons-filter-chip active" data-class="all">All classes</button>
-        <!-- class chips injected here -->
-      </div>
-
-      <div class="dragons-sort-row">
-        <span class="dragons-sort-label">Sort by</span>
-        <div class="dragons-sort-options" id="dragonsSortRow">
-          <button class="dragons-sort-chip active" data-sort="alpha">Alphabetical</button>
-          <button class="dragons-sort-chip" data-sort="appears">Movie / show</button>
-          <button class="dragons-sort-chip" data-sort="class">Class</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ░░ DRAGON GRID ░░ -->
-    <div class="dragons-grid" id="dragonsGrid"></div>
-
-    <p class="dragons-empty" id="dragonsEmpty" hidden>no dragons match that search</p>
-
-    <footer class="dragons-footer">
-      <span>160 species and counting · images coming soon</span>
-    </footer>
-
-  </main>
-
-  <!-- ░░ RANDOM DRAGON SPOTLIGHT ░░ -->
-  <div class="dragons-spotlight-backdrop" id="dragonsSpotlightBackdrop" hidden>
-    <div class="dragons-spotlight" id="dragonsSpotlight" role="dialog" aria-modal="true" aria-label="Random dragon">
-      <button class="dragons-spotlight-close" id="dragonsSpotlightClose" aria-label="Close">✕</button>
-      <div class="dragons-spotlight-body" id="dragonsSpotlightBody"></div>
-      <button class="dragons-spotlight-again" id="dragonsSpotlightAgain">🎲 Roll again</button>
-    </div>
-  </div>
-
-  <script src="script.js?v=1"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>
