@@ -94,15 +94,15 @@
           <span class="tile-launch-arrow">↗</span>
         </a>
 
-        <!-- MINECRAFT SKIN LAUNCH TILE -->
-        <button class="tile tile-launch tile-mc-launch" id="openMcSkin" aria-haspopup="dialog">
+        <!-- MINECRAFT LAUNCH TILE -->
+        <a class="tile tile-launch tile-mc-launch" href="https://judokacube.github.io/jdkcraft" target="_blank" rel="noopener noreferrer">
           <div class="tile-spotlight" aria-hidden="true"></div>
           <div class="tile-launch-icon">🧊</div>
           <div class="tile-launch-text">
             <h3>Minecraft</h3>
           </div>
           <span class="tile-launch-arrow">↗</span>
-        </button>
+        </a>
       </div>
 
       <div class="tile-col-about">
@@ -582,24 +582,6 @@
     </div>
   </div>
 
-  <!-- ░░ MINECRAFT SKIN MODAL ░░ -->
-  <div class="modal-overlay" id="mcSkinModal" role="dialog" aria-modal="true" aria-label="Minecraft skin viewer">
-    <div class="modal-box mc-modal-box">
-      <button class="modal-close" id="closeMcSkin" aria-label="Close minecraft skin viewer">✕</button>
-
-      <div class="mc-skin-card">
-        <div class="mc-skin-label">// minecraft</div>
-        <h2 class="mc-skin-title">JDKCube</h2>
-
-        <div class="mc-skin-canvas-wrap" id="mcSkinCanvasWrap">
-          <canvas id="mcSkinCanvas"></canvas>
-        </div>
-
-        <p class="mc-skin-hint">drag to rotate · scroll to zoom</p>
-      </div>
-    </div>
-  </div>
-
   <!-- ░░ MUSIC PLAYER ░░ -->
   <audio id="bgMusic" src="assets/music.mp3" loop preload="auto"></audio>
 
@@ -645,7 +627,6 @@
   </a>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
   <script src="script.js?v=6"></script>
 </body>
 </html>
