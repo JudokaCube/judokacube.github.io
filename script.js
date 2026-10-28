@@ -17,9 +17,14 @@ function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
   if (!openBtn || !modal || !closeBtn) return;
 
   let openedOnce = false;
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-hidden', 'true');
 
   function open() {
     modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    closeBtn.focus();
     document.body.classList.add('modal-open');
     document.body.style.overflow = 'hidden';
 
@@ -35,6 +40,8 @@ function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
 
   function close() {
     modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    openBtn.focus();
     document.body.classList.remove('modal-open');
     document.body.style.overflow = '';
   }
@@ -47,7 +54,14 @@ function setupModal(openBtnId, modalId, closeBtnId, onFirstOpen) {
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) close();
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') {
+      const focusable = [...modal.querySelectorAll('button, a[href], input, select, textarea, [tabindex="0"]')].filter(el => !el.disabled && el.getClientRects().length);
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
   });
 }
 
@@ -94,6 +108,20 @@ try {
 
   async function initPyodide() {
     statusEl.textContent = 'loading…';
+
+    // Fetch the optional runtime only when the terminal is opened.
+    if (typeof loadPyodide !== 'function') {
+      try {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          const timer = setTimeout(() => { script.remove(); reject(new Error('Runtime download timed out')); }, 25000);
+          script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+          script.onload = () => { clearTimeout(timer); resolve(); };
+          script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error('Runtime download failed')); };
+          document.head.appendChild(script);
+        });
+      } catch (_) { /* Show the existing unavailable-runtime message below. */ }
+    }
 
     if (typeof loadPyodide !== 'function') {
       statusEl.textContent = 'failed to load';
@@ -214,6 +242,7 @@ builtins.help = _browser_help
 /* ── Per-tile spotlight + subtle 3D tilt ── */
 try {
 (function () {
+  if (window.matchMedia('(hover: none), (prefers-reduced-motion: reduce)').matches) return;
   const tiles = document.querySelectorAll('.tile');
   const MAX_TILT = 4; // degrees, kept subtle
 
@@ -245,7 +274,10 @@ try {
       });
     });
 
+    window.addEventListener('resize', () => { rect = null; });
     tile.addEventListener('mouseleave', () => {
+      if (pending) cancelAnimationFrame(pending);
+      pending = null;
       rect = null;
       tile.classList.add('tile-resetting');
       tile.style.transform = '';
@@ -265,10 +297,10 @@ try {
     const isLight = root.getAttribute('data-theme') === 'light';
     if (isLight) {
       root.removeAttribute('data-theme');
-      localStorage.setItem('jdkcube-theme', 'dark');
+      try { localStorage.setItem('jdkcube-theme', 'dark'); } catch (_) {}
     } else {
       root.setAttribute('data-theme', 'light');
-      localStorage.setItem('jdkcube-theme', 'light');
+      try { localStorage.setItem('jdkcube-theme', 'light'); } catch (_) {}
     }
   });
 })();
@@ -285,7 +317,7 @@ try {
   const pauseBtn = document.getElementById('musicPauseBtn');
 
   let playing = false;
-  let open    = false;
+
 
   // Set initial volume
   audio.volume = slider.value / 100;
@@ -293,12 +325,11 @@ try {
 
   // Toggle panel open/close on button click
   btn.addEventListener('click', () => {
-    if (!open) {
-      open = true;
+    if (!widget.classList.contains('open')) {
       widget.classList.add('open');
 
       // Start music on first interaction (browser autoplay policy)
-      if (!playing) {
+      if (audio.paused) {
         audio.play().then(() => {
           playing = true;
           btn.classList.add('playing');
@@ -306,15 +337,13 @@ try {
         }).catch(() => {});
       }
     } else {
-      open = false;
       widget.classList.remove('open');
     }
   });
 
   // Close panel when clicking outside
   document.addEventListener('click', e => {
-    if (!widget.contains(e.target) && open) {
-      open = false;
+    if (!widget.contains(e.target) && widget.classList.contains('open')) {
       widget.classList.remove('open');
     }
   });
@@ -537,14 +566,15 @@ try {
   if (!btn || !valueEl) return;
 
   const STORAGE_KEY = 'jdkcube-clickcount';
-  let count = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+  let count = 0;
+  try { count = parseInt(localStorage.getItem(STORAGE_KEY), 10); } catch (_) {}
   if (!Number.isFinite(count) || count < 0) count = 0;
   valueEl.textContent = count.toLocaleString();
 
   btn.addEventListener('click', () => {
     count += 1;
     valueEl.textContent = count.toLocaleString();
-    localStorage.setItem(STORAGE_KEY, String(count));
+    try { localStorage.setItem(STORAGE_KEY, String(count)); } catch (_) {}
 
     valueEl.classList.remove('bump');
     // force reflow so the animation can restart on rapid clicks
@@ -578,17 +608,24 @@ try {
     const w = wrap.clientWidth;
     const h = wrap.clientHeight;
     if (w === 0 || h === 0) return;
-    canvas.width = w * ratio;
-    canvas.height = h * ratio;
+    if (canvas.width === Math.round(w * ratio) && canvas.height === Math.round(h * ratio)) return;
+    const previous = document.createElement('canvas');
+    previous.width = canvas.width; previous.height = canvas.height;
+    previous.getContext('2d').drawImage(canvas, 0, 0);
+    drawing = false;
+    canvas.width = Math.round(w * ratio);
+    canvas.height = Math.round(h * ratio);
     canvas.style.width = w + 'px';
     canvas.style.height = h + 'px';
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    ctx.drawImage(previous, 0, 0, previous.width, previous.height, 0, 0, w, h);
   }
 
   // wait a tick so layout/fonts have settled before measuring the wrapper
   requestAnimationFrame(resizeCanvas);
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resizeCanvas).observe(wrap);
 
   let resizeTimer;
   window.addEventListener('resize', () => {
